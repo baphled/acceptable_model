@@ -1,6 +1,9 @@
 require "active_support/inflector"
 
 module AcceptableModel
+  #
+  # Define the Class that we want to define as having a relationship
+  #
   def self.define model
     dynamic_name = "Acceptable#{model.to_s.capitalize}"
     model_object = model.to_s.capitalize.constantize
@@ -8,21 +11,19 @@ module AcceptableModel
     dynamic_name.constantize.extend HateOS
   end
 
+  #
+  # HATEOS based presentation for models
+  #
   module HateOS
-    module ClassMethods
+    def self.relationship_types
+      %w{part_of}
     end
-  
+
     module InstanceMethods
       attr_accessor :base_relationship
 
       attr_accessor :relationships
       private :relationships=
-
-      def relationships
-        relationships = extended_relationships.collect! { |relationship| build_relationship relationship }
-        return base_relationship if relationships.empty?
-        relationships.unshift( base_relationship ).flatten!
-      end
 
       def to_json options = {}
         opts = {
@@ -33,30 +34,55 @@ module AcceptableModel
 
       protected
 
-      def extended_relationships
-        types = %w{part_of}.select { |type| self.public_methods(false).include? type.to_sym }
+      #
+      # A list of the models relationships
+      #
+      def relationships
+        relationships = extended_relationships.collect! { |relationship| relationship_mapper relationship }
+        return base_relationship if relationships.empty?
+        relationships.unshift( base_relationship ).flatten!
       end
 
-      def build_relationship type
-        send(type.to_sym).collect { |part| 
+      #
+      # Gather a list of relationships created by the user
+      #
+      def extended_relationships
+        HateOS.relationship_types.select { |type| extended_relationship? type }
+      end
+
+      #
+      # Check that the object has the relationship defined
+      #
+      def extended_relationship? relationship
+        self.public_methods(false).include? relationship.to_sym
+      end
+
+      #
+      # Maps the relationship to the format we expect
+      #
+      def relationship_mapper relationship
+        send(relationship.to_sym).collect { |part| 
           {
             :href => "/#{part.class.to_s.downcase.pluralize}/#{part.id}",
-            :rel => "/#{type.camelize :lower}"
+            :rel => "/#{relationship.camelize :lower}"
           }
         }
       end
 
+      #
+      # Our response object always has a reference to itself
+      #
       def base_relationship
          [
            {
-             :href => "/#{self.class.to_s.downcase.pluralize}/#{id}", :rel => '/self'
+             :href => "/#{self.class.to_s.downcase.pluralize}/#{id}",
+             :rel => '/self'
            }
          ]
       end
     end
 
     def self.included(receiver)
-      receiver.extend         ClassMethods
       receiver.send :include, InstanceMethods
     end
   end

@@ -1,4 +1,6 @@
 Inpired by a conversation with @craigwebster I've been thinking lately about APIs and how to separate presentation logic from controllers and models in a clean way.
+
+So we have a model, that has a few associations and accessors
 `
   class Artist
     attr_accessor :name, :albums, :songs, :debut
@@ -13,46 +15,10 @@ Inpired by a conversation with @craigwebster I've been thinking lately about API
   end
 `
 
-`
-  AcceptableModel.do |model|
-    model.class: :artist
-  end
-`
-This is how we like it, our models shouldn't know about presentation logic
+Now it'd be cool if we could extend our output to include relationships between information and provide a HATEOS like API. That's all when and good but you're likely to either add this extra functionality to the model, create helpers to render the extra data or clutter up your controllers.
 
-By default AcceptableArtist will include all accessor methods that the Artist class exposes.
 
-`
-  class AcceptableArtist
-
-    # /relationships/partOf
-    #
-    # It doesn't matter whether the method returns an Array, or object as
-    # long as it has an id
-    #
-    def part_of
-      know_groups
-    end 
-
-    #
-    # /relationships/child
-    #
-    # The link is assumed by the name of the originating class and the
-    # objects id
-    #
-    # => 
-    #   {
-    #     'rel': '/relations/child',
-    #     'href': '/albums/the-coming'
-    #   }
-    #
-    def children
-      albums
-    end
-  end
-`
-
-In true DRY fashion there is not need define a links href as they will be looked up via our controllers.
+So we can define an object `AcceptableModel.define 'artist'` and then you have a Presenter like object that deals with the models presentation features
 
 `
   class Artists < Sinatra::Base
@@ -68,9 +34,47 @@ In true DRY fashion there is not need define a links href as they will be looked
   end
 `
 
+This is how we like it, our models shouldn't know about presentation logic
+
+By default AcceptableArtist will include all accessor methods that the Artist
+class exposes.
+
+The cool thing about the rel attribute is that we can define our own, doing
+this couldn't be easier. Re-open the defined class and simple create your own
+relationship.
 `
-  curl  -H 'Accept: application/json' -i http://localhost:9292/artist/busta-rhymes
+  class AcceptableArtist
+
+    # /partOf
+    #
+    # It doesn't matter whether the method returns an Array, or object as
+    # long as it has an id
+    #
+    def part_of
+      know_groups
+    end 
+
+    #
+    # /child
+    #
+    # The link is assumed by the name of the originating class and the
+    # objects id
+    #
+    # => 
+    #   {
+    #     'rel': '/child',
+    #     'href': '/albums/the-coming'
+    #   }
+    #
+    def children
+      albums
+    end
+  end
 `
+
+Defining these methods exposes the objects relationships, visiting the resource
+`curl  -H 'Accept: application/json' -i http://localhost:9292/artists/busta-rhymes`
+exposes the following response.
 
 `
 {
@@ -81,7 +85,7 @@ In true DRY fashion there is not need define a links href as they will be looked
     'links': [
       {
         'href': '/albums/the-coming',
-        'rel': '/relationships/children'
+        'rel': '/child'
       }
     ]
   ],
@@ -91,17 +95,49 @@ In true DRY fashion there is not need define a links href as they will be looked
   'links': [
     {
       'href': '/artists/cilla_black',
-      'rel': '/relations/self',
+      'rel': '/self'
     },
     {
       'href': '/collections/leaders-of-the-new-school',
-      'rel': '/relations/partOf'
+      'rel': '/partOf'
     },
     {
       'href': '/collections/Flipmode-squad',
-      'rel': '/relations/partOf'
+      'rel': '/partOf'
     }
   ]
 }
 `
 
+All this from a few lines of code :D
+
+TODO
+====
+
+In true DRY fashion there is not need define a links href as they will be looked up via our controllers.
+
+Should be able to define associations that should include relationships
+
+`
+  class AcceptableArtist
+    rel_associations :groups
+  end
+`
+
+Returns the association along with its links:
+
+`
+  {
+    'name': 'Busta Rhymes',
+    'debut': '1990'
+    'albums': [
+      'name': 'The Coming',
+      'links': [
+        {
+          'href': '/albums/the-coming',
+          'rel': '/children'
+        }
+      ]
+    ]
+  }
+`

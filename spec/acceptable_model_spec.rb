@@ -35,9 +35,12 @@ class Group
   end
 end
 
-AcceptableModel.define 'artist'
 
 describe AcceptableModel do
+  before :each do
+    AcceptableModel.define 'artist'
+  end
+
   describe "#define" do
     it "dyanmically defines a new class" do
       expect {
@@ -54,9 +57,6 @@ describe AcceptableModel do
   end
 
   describe "#to_json" do
-    before :all do
-      AcceptableModel.define 'group'
-    end
 
     it "returns at HATEOS like format" do
       expected = {
@@ -73,16 +73,8 @@ describe AcceptableModel do
     end
 
     context "extended relationships" do
-      before do
-        class AcceptableArtist
-          def part_of
-            groups.all
-          end
-        end
-      end
-
-      it "can extend the relationship links" do
-        expected = {
+      let(:relationships) {
+        {
           :links => [
             {
               :href => '/artists/busta-rhymes',
@@ -98,12 +90,24 @@ describe AcceptableModel do
             }
           ],
           :name => 'Busta Rhymes'
-        }.to_json
+        }
+      }
+
+      before :all do
+        AcceptableModel.define 'group'
+        class AcceptableArtist
+          def part_of
+            groups.all
+          end
+        end
+      end
+
+      it "can extend the relationship links" do
         model = AcceptableArtist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School']
         group1 = Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad'
         group2 = Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school'
         model.groups.stub(:all).and_return [group1, group2]
-        model.to_json.should eql expected
+        model.to_json.should eql relationships.to_json
       end
     end
   end
