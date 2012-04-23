@@ -40,10 +40,20 @@ class Group
   end
 end
 
-
 describe AcceptableModel do
   before :each do
     AcceptableModel.define 'artist'
+  end
+
+  it "should have a list of rel types" do
+    AcceptableModel::HATEOS.relationship_types.should eql %w{part_of parent child contains prev next same_as}
+  end
+  
+  it "allows us to add our own rel types" do
+    AcceptableModel::HATEOS.config do |config|
+      config.relationships = %w{service}
+    end
+    AcceptableModel::HATEOS.relationship_types.should include 'service'
   end
 
   describe "#define" do

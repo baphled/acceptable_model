@@ -37,8 +37,22 @@ module AcceptableModel
   # HATEOS based presentation for models
   #
   module HATEOS
-    def self.relationship_types
-      %w{part_of}
+
+    class << self
+      attr_accessor :relationship_types
+      attr_accessor :relationships
+
+      def configure
+        yield self
+        true
+      end
+      alias :config :configure
+
+      def relationship_types
+        @relationship_types = %w{part_of parent child contains prev next same_as}
+        @relationship_types = @relationship_types | AcceptableModel::HATEOS.relationships unless AcceptableModel::HATEOS.relationships.nil?
+        @relationship_types
+      end
     end
 
     module InstanceMethods
