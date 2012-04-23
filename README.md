@@ -56,6 +56,8 @@ This is how we like it, our models shouldn't know about presentation logic
 By default AcceptableModel::Artist will include all accessor methods that the Artist
 class exposes.
 
+### Adding relationships
+
 The cool thing about the rel attribute is that we can define our own values,
 doing this couldn't be easier. Re-open the defined class and simple create your
 own Re-open the defined class and simple create your own relationship.
