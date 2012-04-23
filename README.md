@@ -1,4 +1,6 @@
-Inpired by a conversation with @craigwebster I've been thinking lately about APIs and how to separate presentation logic from controllers and models in a clean way.
+Inpired by a conversation with @craigwebster and from reading @avidgrimm's
+'Objects on Rails' book I've been thinking lately about APIs and how to
+separate presentation logic from controllers and models in a clean way.
 
 So we have a model, that has a few associations and accessors
 `
@@ -15,21 +17,30 @@ So we have a model, that has a few associations and accessors
   end
 `
 
-Now it'd be cool if we could extend our output to include relationships between information and provide a HATEOS like API. That's all when and good but you're likely to either add this extra functionality to the model, create helpers to render the extra data or clutter up your controllers.
+Now it'd be cool if we could extend our output to include relationships between
+information and provide a HATEOS like API without cluttering up a beautiful
+slim models.
 
+Inspired by reading Avid's 'Object on Rails' book, it'd be nice if we could
+simply delegate to our created model and have a Presenter like model that deals
+with all the presentational logic for us.
 
-So we can define an object `AcceptableModel.define 'artist'` and then you have a Presenter like object that deals with the models presentation features
+We want this to be with a little ceremony as possible and make sure that our
+models truely stay separate from our presentation logic.
+
+So we can define an object `AcceptableModel.define 'artist'` and then you have
+a Presenter like object that deals with the models presentation features
 
 `
   class Artists < Sinatra::Base
     get '/artists'
-      AcceptableArtist.all
+      AcceptableModel::Artist.all
     end
   end
 
   class Groups < Sinatra::Base
     get '/collecions'
-      Groups.all
+      AcceptableModel::Groups.all
     end
   end
 `
@@ -43,7 +54,7 @@ The cool thing about the rel attribute is that we can define our own, doing
 this couldn't be easier. Re-open the defined class and simple create your own
 relationship.
 `
-  class AcceptableArtist
+  class AcceptableModel::Artist
 
     # /partOf
     #
@@ -114,7 +125,8 @@ All this from a few lines of code :D
 TODO
 ====
 
-In true DRY fashion there is not need define a links href as they will be looked up via our controllers.
+In true DRY fashion there is not need define a links href as they will be
+looked up via our controllers.
 
 Should be able to define associations that should include relationships
 
