@@ -52,6 +52,7 @@ class exposes.
 
 The cool thing about the rel attribute is that we can define our own, doing
 this couldn't be easier. Re-open the defined class and simple create your own
+Re-open the defined class and simple create your own
 relationship.
 ``
   class AcceptableModel::Artist
@@ -122,6 +123,17 @@ exposes the following response.
 
 All this from a few lines of code :D
 
+AcceptableModel define a range of rel values but we should also be able to
+create our own rel types, we could do this via the config method as follows:
+
+``
+  AcceptableModel.config do |config|
+    config.relationships = %w{self contains part_of parent child}
+  end
+``
+
+This will prefix all of our rel attribuetes with the string above
+
 TODO
 ====
 
@@ -167,13 +179,3 @@ something like this:
   end
 ``
 
-This will prefix all of our rel attribuetes with the string above
-
-We should also be able to create our own rel types, we could do this via the
-config method as follows:
-
-``
-  AcceptableModel.config do |config|
-    config.relationships = %w{self contains part_of parent child}
-  end
-``

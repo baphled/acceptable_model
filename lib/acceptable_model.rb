@@ -39,8 +39,15 @@ module AcceptableModel
   module HATEOS
 
     class << self
-      attr_accessor :relationship_types
+      #
+      # Configuration variables
+      #
       attr_accessor :relationships
+
+      #
+      # A complete list of relationship types to look for
+      #
+      attr_accessor :relationship_types
 
       def configure
         yield self
