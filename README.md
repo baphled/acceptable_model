@@ -28,7 +28,7 @@ with all the presentational logic for us.
 We want this to be with a little ceremony as possible and make sure that our
 models truely stay separate from our presentation logic.
 
-So`we can define an object `AcceptableModel.define 'artist'` and then you have
+So we can define an object `AcceptableModel.define 'artist'` and then you have
 a Presenter like object that deals with the models presentation features
 
 ``
@@ -136,7 +136,8 @@ Should be able to define associations that should include relationships
   end
 ``
 
-This allows you to define which methods should be included in the response body along with their associated links.
+This allows you to define which methods should be included in the response body
+along with their associated links.
 
 When calling `model.all` the output will now be as following:
 
@@ -156,7 +157,9 @@ When calling `model.all` the output will now be as following:
   }
 ``
 
-We should also be able to easily change the rel attributes so that we can fully customised the way they are displayed. It would be nice if we could do something like this:
+We should also be able to easily change the rel attributes so that we can fully
+customised the way they are displayed. It would be nice if we could do
+something like this:
 
 ``
 AcceptableModel.config do |config|
@@ -166,7 +169,8 @@ end
 
 This will prefix all of our rel attribuetes with the string above
 
-We should also be able to create our own rel types, we could do this via the config method as follows:
+We should also be able to create our own rel types, we could do this via the
+config method as follows:
 
 ``
 AcceptableModel.config do |config|
