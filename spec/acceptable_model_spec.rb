@@ -1,6 +1,5 @@
 require "acceptable_model"
 
-require "json"
 
 class Artist
   attr_accessor :name, :id, :groups
@@ -12,9 +11,12 @@ class Artist
   end
 
   def to_json params = {}
-    {:name => name}.merge(params).to_json
+    attributes.merge!(params).to_json
   end
 
+  def attributes
+    @attributes ||= {:id => id, :name => name}
+  end
   protected
 
   def groups= groups
@@ -29,8 +31,12 @@ class Group
     self.id = self.name.downcase.gsub(' ', '-')
   end
 
+  def attributes
+    @attributes ||= {:id => id, :name => name}
+  end
+
   def to_json params = {}
-    super :name => name
+    attributes.merge!(params).to_json
   end
 end
 
@@ -56,9 +62,9 @@ describe AcceptableModel do
   end
 
   describe "#to_json" do
-
     it "returns at HATEOS like format" do
       expected = {
+        :id => 'busta-rhymes',
         :name => 'Busta Rhymes',
         :links => [
           {
@@ -74,6 +80,7 @@ describe AcceptableModel do
     context "extended relationships" do
       let(:relationships) {
         {
+          :id => 'busta-rhymes',
           :name => 'Busta Rhymes',
           :links => [
             {

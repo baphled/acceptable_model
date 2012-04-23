@@ -1,5 +1,6 @@
 require "active_support/inflector"
 require "delegate"
+require "json"
 
 module AcceptableModel
   #
@@ -46,11 +47,14 @@ module AcceptableModel
       attr_accessor :relationships
       private :relationships=
 
+      #
+      # Overide the models to_json method so that we can can display our
+      # serialised data
+      #
       def to_json options = {}
-        opts = {
-          :links => relationships
-        }.merge! options
-        super opts
+        opts = {:links => relationships}.merge! options
+        attributes.merge! opts
+        super attributes
       end
 
       protected
