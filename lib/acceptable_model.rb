@@ -1,20 +1,41 @@
 require "active_support/inflector"
+require "delegate"
 
 module AcceptableModel
   #
   # Define the Class that we want to define as having a relationship
   #
   def self.define model
-    dynamic_name = "Acceptable#{model.to_s.capitalize}"
+    dynamic_name = "#{model.to_s.capitalize}"
     model_object = model.to_s.capitalize.constantize
-    Object.const_set(dynamic_name.to_sym, model_object)
-    dynamic_name.constantize.extend HateOS
+    eval define_class dynamic_name
+  end
+
+  def self.define_class model_object
+    """
+    class #{model_object} < SimpleDelegator
+      include HATEOS
+
+      def initialize params
+        @delegate_model = ::#{model_object}.new params
+        super @delegate_model
+      end
+
+      def to_model
+        __getobj__
+      end
+
+      def class
+        __getobj__.class
+      end
+    end
+    """
   end
 
   #
   # HATEOS based presentation for models
   #
-  module HateOS
+  module HATEOS
     def self.relationship_types
       %w{part_of}
     end
@@ -29,7 +50,7 @@ module AcceptableModel
         opts = {
           :links => relationships
         }.merge! options
-        opts.to_json
+        super opts
       end
 
       protected
@@ -47,7 +68,7 @@ module AcceptableModel
       # Gather a list of relationships created by the user
       #
       def extended_relationships
-        HateOS.relationship_types.select { |type| extended_relationship? type }
+        HATEOS.relationship_types.select { |type| extended_relationship? type }
       end
 
       #

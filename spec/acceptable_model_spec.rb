@@ -4,7 +4,6 @@ require "json"
 
 class Artist
   attr_accessor :name, :id, :groups
-  include AcceptableModel::HateOS
 
   def initialize params = {}
     self.name = params[:name]
@@ -12,8 +11,8 @@ class Artist
     self.id = self.name.downcase.gsub(' ', '-')
   end
 
-  def to_json
-    super :name => name
+  def to_json params = {}
+    {:name => name}.merge(params).to_json
   end
 
   protected
@@ -30,7 +29,7 @@ class Group
     self.id = self.name.downcase.gsub(' ', '-')
   end
 
-  def to_json
+  def to_json params = {}
     super :name => name
   end
 end
@@ -44,14 +43,14 @@ describe AcceptableModel do
   describe "#define" do
     it "dyanmically defines a new class" do
       expect {
-        AcceptableArtist.new :name => 'Busta Rhymes'
+        AcceptableModel::Artist.new :name => 'Busta Rhymes'
       }.to_not raise_error Exception
     end
   end
 
   context "a dynamically defined class" do
     it "exposes the originating models accessors" do
-      model = AcceptableArtist.new :name => 'Busta Rhymes'
+      model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
       model.name.should eql 'Busta Rhymes'
     end
   end
@@ -60,21 +59,22 @@ describe AcceptableModel do
 
     it "returns at HATEOS like format" do
       expected = {
+        :name => 'Busta Rhymes',
         :links => [
           {
             :href => '/artists/busta-rhymes',
             :rel => '/self'
           }
-        ],
-        :name => 'Busta Rhymes'
+        ]
       }.to_json
-      model = AcceptableArtist.new :name => 'Busta Rhymes'
+      model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
       model.to_json.should eql expected
     end
 
     context "extended relationships" do
       let(:relationships) {
         {
+          :name => 'Busta Rhymes',
           :links => [
             {
               :href => '/artists/busta-rhymes',
@@ -88,14 +88,13 @@ describe AcceptableModel do
               :href => '/groups/leaders-of-the-new-school',
               :rel => '/partOf'
             }
-          ],
-          :name => 'Busta Rhymes'
+          ]
         }
       }
 
       before :all do
         AcceptableModel.define 'group'
-        class AcceptableArtist
+        class AcceptableModel::Artist
           def part_of
             groups.all
           end
@@ -103,7 +102,7 @@ describe AcceptableModel do
       end
 
       it "can extend the relationship links" do
-        model = AcceptableArtist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School']
+        model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School']
         group1 = Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad'
         group2 = Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school'
         model.groups.stub(:all).and_return [group1, group2]
