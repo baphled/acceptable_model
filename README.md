@@ -88,36 +88,36 @@ Defining these methods exposes the objects relationships, visiting the resource
 exposes the following response.
 
 ``
-{
-  'name': 'Busta Rhymes',
-  'debut': '1990'
-  'albums': [
-    'name': 'The Coming',
+  {
+    'name': 'Busta Rhymes',
+    'debut': '1990'
+    'albums': [
+      'name': 'The Coming',
+      'links': [
+        {
+          'href': '/albums/the-coming',
+          'rel': '/child'
+        }
+      ]
+    ],
+    'songs': [
+      {'title': 'Gimme Some more', 'duration': '4:05'}
+    ]
     'links': [
       {
-        'href': '/albums/the-coming',
-        'rel': '/child'
+        'href': '/artists/cilla_black',
+        'rel': '/self'
+      },
+      {
+        'href': '/collections/leaders-of-the-new-school',
+        'rel': '/partOf'
+      },
+      {
+        'href': '/collections/Flipmode-squad',
+        'rel': '/partOf'
       }
     ]
-  ],
-  'songs': [
-    {'title': 'Gimme Some more', 'duration': '4:05'}
-  ]
-  'links': [
-    {
-      'href': '/artists/cilla_black',
-      'rel': '/self'
-    },
-    {
-      'href': '/collections/leaders-of-the-new-school',
-      'rel': '/partOf'
-    },
-    {
-      'href': '/collections/Flipmode-squad',
-      'rel': '/partOf'
-    }
-  ]
-}
+  }
 ``
 
 All this from a few lines of code :D
@@ -162,9 +162,9 @@ customised the way they are displayed. It would be nice if we could do
 something like this:
 
 ``
-AcceptableModel.config do |config|
-  config.rel_prefix = '/relations/'
-end
+  AcceptableModel.config do |config|
+    config.rel_prefix = '/relations/'
+  end
 ``
 
 This will prefix all of our rel attribuetes with the string above
@@ -173,7 +173,7 @@ We should also be able to create our own rel types, we could do this via the
 config method as follows:
 
 ``
-AcceptableModel.config do |config|
-  config.relationships = %w{self contains part_of parent child}
-end
+  AcceptableModel.config do |config|
+    config.relationships = %w{self contains part_of parent child}
+  end
 ``
