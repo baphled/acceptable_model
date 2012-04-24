@@ -17,6 +17,27 @@ module AcceptableModel
     class #{model_object} < SimpleDelegator
       include HATEOS
 
+      class << self
+        attr_accessor :associations
+
+        #
+        # Map associations
+        #
+        # This macro is used to allow users to map associations to a model
+        # allowing for a HATEOS compliant format
+        #
+        def relationship association
+          @associations = [] if @associations.nil?
+          @associations << association.to_s unless @associations.include? association.to_s
+        end
+
+        #
+        # Delegate class methods to the correct object
+        #
+        def method_missing method, *args
+          ::#{model_object}.send(method,args)
+        end
+
       def initialize params
         @delegate_model = ::#{model_object}.new params
         super @delegate_model
@@ -29,6 +50,7 @@ module AcceptableModel
       def class
         __getobj__.class
       end
+
     end
     """
   end
@@ -64,15 +86,26 @@ module AcceptableModel
 
     module InstanceMethods
       attr_accessor :base_relationship
+      attr_accessor :associations
 
       attr_accessor :relationships
       private :relationships=
+
+      def rel_links
+        associations = eval( "AcceptableModel::#{ self.class }" ).associations
+        return [] if associations.nil?
+        associations.collect { |association| 
+          return [] if send(association.pluralize.to_sym).nil?
+          build_association association
+        }
+      end
 
       #
       # Overide the models to_json method so that we can can display our
       # serialised data
       #
       def to_json options = {}
+        rel_links.each{|association| attributes.merge! association }
         opts = {:links => relationships}.merge! options
         attributes.merge! opts
         super attributes
@@ -80,8 +113,30 @@ module AcceptableModel
 
       protected
 
+      def build_association association
+        {
+          association.pluralize.to_sym => 
+          send(association.pluralize.to_sym).collect { |model| 
+            model.attributes.merge! build_relationship model, association
+          }
+        }
+      end
       #
-      # A list of the models relationships
+      # Dynamically builds associative relationships
+      #
+      def build_relationship model, association
+        {
+          :links => [
+            {
+              :href => "/#{association.pluralize}/#{model.id}",
+              :rel => "/children"
+            }
+          ]
+        }
+      end
+
+      #
+      # A list of the model relationships
       #
       def relationships
         relationships = extended_relationships.collect! { |relationship| relationship_mapper relationship }

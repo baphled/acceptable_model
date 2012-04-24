@@ -20,7 +20,7 @@ class Artist
   protected
 
   def groups= groups
-    @group = groups.each {|group| Group.new :name => group} unless groups.nil?
+    @groups = groups.collect {|group| Group.new :name => group} unless groups.nil?
   end
 end
 
@@ -71,6 +71,59 @@ describe AcceptableModel do
     end
   end
 
+  context "define associative relationships" do
+    before do
+      class AcceptableModel::Artist
+        relationship :group
+      end
+    end
+
+    it "lists the objects relationships" do
+      AcceptableModel::Artist.associations.should include 'group'
+    end
+
+    it "should have a list of associations" do
+      AcceptableModel::Artist.associations.should be_a Array
+    end
+
+    it "should allow use to define a relationship" do
+      expected = {
+        'id' => 'busta-rhymes',
+        'name' => 'Busta Rhymes',
+        'groups' => [
+          {
+            'id' => 'flipmode-squad',
+            'name' => 'Flipmode Squad',
+            'links' => [
+              {
+               'href' => '/groups/flipmode-squad',
+               'rel' => '/children'
+              }
+            ]
+          },
+          {
+            'id' => 'leaders-of-the-new-school',
+            'name' => 'Leaders of The New School',
+            'links' => [
+              {
+               'href' => '/groups/leaders-of-the-new-school',
+               'rel' => '/children'
+              }
+            ]
+          }
+        ],
+        :links => [
+          {
+            :href => '/artists/busta-rhymes',
+            :rel => '/self'
+          }
+        ]
+      }.to_json
+      model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School']
+      model.to_json.should eql expected
+    end
+  end
+
   describe "#to_json" do
     it "returns at HATEOS like format" do
       expected = {
@@ -92,6 +145,28 @@ describe AcceptableModel do
         {
           :id => 'busta-rhymes',
           :name => 'Busta Rhymes',
+          :groups => [
+            {
+              'id' => 'flipmode-squad',
+              'name' => 'Flipmode Squad',
+              'links' => [
+                {
+                 'href' => '/groups/flipmode-squad',
+                 'rel' => '/children'
+                }
+              ]
+            },
+            {
+              'id' => 'leaders-of-the-new-school',
+              'name' => 'Leaders of The New School',
+              'links' => [
+                {
+                 'href' => '/groups/leaders-of-the-new-school',
+                 'rel' => '/children'
+                }
+              ]
+            }
+          ],
           :links => [
             {
               :href => '/artists/busta-rhymes',
@@ -110,7 +185,6 @@ describe AcceptableModel do
       }
 
       before :all do
-        AcceptableModel.define 'group'
         class AcceptableModel::Artist
           def part_of
             groups.all
