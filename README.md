@@ -91,12 +91,15 @@ own Re-open the defined class and simple create your own relationship.
     end
 
 Defining these methods exposes the objects relationships, visiting the resource
-`curl  -H 'Accept: application/json' -i http://localhost:9292/artists/busta-rhymes`
+
+    artist = AcceptableModel::Artist.first
+    Artist.to_json
+
 exposes the following response.
 
     {
       'name': 'Busta Rhymes',
-      'debut': '1990'
+      'debut': '1990',
       'albums': [
         'name': 'The Coming',
         'links': [
@@ -108,7 +111,7 @@ exposes the following response.
       ],
       'songs': [
         {'title': 'Gimme Some more', 'duration': '4:05'}
-      ]
+      ],
       'links': [
         {
           'href': '/artists/cilla_black',
@@ -127,6 +130,8 @@ exposes the following response.
 
 All this from a few lines of code :D
 
+### Adding rel attributes
+
 AcceptableModel define a range of rel values but we should also be able to
 create our own rel types, we could do this via the config method as follows:
 
@@ -134,9 +139,7 @@ create our own rel types, we could do this via the config method as follows:
       config.relationships = %w{self contains part_of parent child}
     end
 
-This will prefix all of our rel attribuetes with the string above
-
-## TODO
+### Displaying model associations
 
 In true DRY fashion there is not need define a links href as they will be
 looked up via our controllers.
@@ -165,6 +168,8 @@ When calling `model.all` the output will now be as following:
         ]
       ]
     }
+
+## TODO
 
 We should also be able to easily change the rel attributes so that we can fully
 customised the way they are displayed. It would be nice if we could do
