@@ -10,6 +10,10 @@ class Artist
     self.id = self.name.downcase.gsub(' ', '-')
   end
 
+  def self.find id
+    new :id => id, :name => 'Busta Rhymes'
+  end
+
   def to_json params = {}
     attributes.merge!(params).to_json
   end
@@ -17,6 +21,8 @@ class Artist
   def attributes
     @attributes ||= {:id => id, :name => name}
   end
+  alias :to_hash :attributes
+
   protected
 
   def groups= groups
@@ -184,8 +190,15 @@ describe AcceptableModel do
         }
       }
 
-      before :all do
+      before do
         class AcceptableModel::Artist
+          version ['vnd.acme.sandwich-v1+json', 'vnd.acme.sandwich-v1+xml'] do |artist|
+            {
+              :id => artist.id,
+              :name => artist.name
+            }
+          end
+
           def part_of
             groups.all
           end
@@ -199,6 +212,15 @@ describe AcceptableModel do
         model.groups.stub(:all).and_return [group1, group2]
         model.to_json.should eql relationships.to_json
       end
+
+      it "allows for the output format to be passed" do
+        expected = {:id => 'busta-rhymes', :name => 'Busta Rhymes'}
+        model = AcceptableModel::Artist.find(:id => 'busta-rhymes')
+        model.for('vnd.acme.sandwich-v1+json').should eql expected.to_json
+      end
+
+      it "can deal with XML formats the same as JSON formats"
+      it "mime type not found"
     end
   end
 end

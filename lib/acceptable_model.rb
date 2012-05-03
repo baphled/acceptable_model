@@ -18,7 +18,15 @@ module AcceptableModel
       include HATEOS
 
       class << self
-        attr_accessor :associations
+        attr_accessor :associations, :version_mapper
+
+        #
+        # Maps API version and MIME type
+        #
+        def version versions, &block
+          @version_mapper = [] if @version_mapper.nil?
+          versions.collect { |version| @version_mapper <<  {:version => version, :api_hash => block } }
+        end
 
         #
         # Map associations
@@ -32,11 +40,20 @@ module AcceptableModel
         end
 
         #
+        # FIXME Shouldn't need this ideally, need to find a way to remove it or make cleaner
+        #
+        def find params
+          object = super
+          new object.to_hash
+        end
+
+        #
         # Delegate class methods to the correct object
         #
         def method_missing method, *args
           ::#{model_object}.send(method,args)
         end
+      end
 
       def initialize params
         @delegate_model = ::#{model_object}.new params
@@ -90,6 +107,27 @@ module AcceptableModel
 
       attr_accessor :relationships
       private :relationships=
+
+      #
+      # returns the correct response type and API version
+      #
+      def for mime_type
+        map  = version_lookup mime_type
+        mime = mime_type_lookup mime_type
+        response = map[:api_hash].call self
+        convert_to = "to_#{mime}".to_sym
+        response.send(convert_to)
+      end
+
+      def mime_type_lookup mime_type
+        respond_with = version_lookup mime_type
+        mime_type.split('+').last unless respond_with.nil?
+      end
+
+      def version_lookup mime_type
+        mappers = eval( "AcceptableModel::#{ self.class }" ).version_mapper
+        mappers.detect { |mapper| mime_type == mapper[:version] }
+      end
 
       def rel_links
         associations = eval( "AcceptableModel::#{ self.class }" ).associations
