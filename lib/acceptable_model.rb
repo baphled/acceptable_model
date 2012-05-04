@@ -25,7 +25,7 @@ module AcceptableModel
         #
         def version versions, &block
           @version_mapper = [] if @version_mapper.nil?
-          versions.collect { |version| @version_mapper <<  {:version => version, :api_hash => block } }
+          versions.collect { |version| @version_mapper <<  {:version => version, :attributes => block } }
         end
 
         #
@@ -114,9 +114,9 @@ module AcceptableModel
       def for mime_type
         map  = version_lookup mime_type
         mime = mime_type_lookup mime_type
-        response = map[:api_hash].call self
+        attributes = map[:attributes].call self
         convert_to = "to_#{mime}".to_sym
-        response.send(convert_to)
+        send convert_to
       end
 
       def mime_type_lookup mime_type

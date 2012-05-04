@@ -2,16 +2,13 @@ require "acceptable_model"
 
 
 class Artist
-  attr_accessor :name, :id, :groups
+  attr_accessor :name, :aliases, :id, :groups
 
   def initialize params = {}
     self.name = params[:name]
+    self.aliases = params[:aliases]
     self.groups = params[:groups]
     self.id = self.name.downcase.gsub(' ', '-')
-  end
-
-  def self.find id
-    new :id => id, :name => 'Busta Rhymes'
   end
 
   def to_json params = {}
@@ -214,9 +211,11 @@ describe AcceptableModel do
       end
 
       it "allows for the output format to be passed" do
-        expected = {:id => 'busta-rhymes', :name => 'Busta Rhymes'}
-        model = AcceptableModel::Artist.find(:id => 'busta-rhymes')
-        model.for('vnd.acme.sandwich-v1+json').should eql expected.to_json
+        model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :aliases => ['Busta Bus'], :groups => ['Flipmode Squad', 'Leaders of The New School']
+        group1 = Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad'
+        group2 = Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school'
+        model.groups.stub(:all).and_return [group1, group2]
+        model.for('vnd.acme.sandwich-v1+json').should eql relationships.to_json
       end
 
       it "can deal with XML formats the same as JSON formats"
