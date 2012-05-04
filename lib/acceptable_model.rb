@@ -4,6 +4,8 @@ require "delegate"
 require "json"
 
 module AcceptableModel
+  class MimeTypeNotReckonised < Exception
+  end
   #
   # Define the Class that we want to define as having a relationship
   #
@@ -115,6 +117,7 @@ module AcceptableModel
       def for mime_type
         map  = version_lookup mime_type
         mime = mime_type_lookup mime_type
+        raise MimeTypeNotReckonised.new mime_type if map.nil?
         attributes = map[:attributes].call self
         convert_to = "to_#{mime}".to_sym
         send convert_to
