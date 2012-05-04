@@ -43,14 +43,6 @@ module AcceptableModel
         end
 
         #
-        # FIXME Shouldn't need this ideally, need to find a way to remove it or make cleaner
-        #
-        def find params
-          object = super
-          new object.to_hash
-        end
-
-        #
         # Delegate class methods to the correct object
         #
         def method_missing method, *args
@@ -116,8 +108,8 @@ module AcceptableModel
       #
       def for mime_type
         map  = version_lookup mime_type
-        mime = mime_type_lookup mime_type
         raise MimeTypeNotReckonised.new mime_type if map.nil?
+        mime = mime_type_lookup mime_type
         attributes = map[:attributes].call self
         convert_to = "to_#{mime}".to_sym
         send convert_to
@@ -249,4 +241,3 @@ module AcceptableModel
     end
   end
 end
-
