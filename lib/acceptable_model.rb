@@ -1,4 +1,5 @@
 require "active_support/inflector"
+require "builder"
 require "delegate"
 require "json"
 
@@ -149,7 +150,26 @@ module AcceptableModel
         super attributes
       end
 
+      def to_xml options = {}
+        rel_links.each{|association| attributes.merge! association }
+        opts = {:links => relationships}.merge! options
+        attributes.merge! opts
+        xml = Builder::XmlMarkup.new :output => STDOUT
+        build_xml( xml, attributes ).target!
+      end
+
       protected
+
+      def build_xml xml, attributes
+        attributes.each do |k,v|
+          if v.class == Array
+            v.each_with_index {|attr, index| build_xml xml,attr }
+          else
+            eval"xml.__send__(k.to_sym, v)"
+          end
+        end
+        xml
+      end
 
       def build_association association
         {

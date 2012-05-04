@@ -1,6 +1,7 @@
 source "http://rubygems.org"
 
 gem 'active_support'
+gem 'builder'
 # Add dependencies required to use your gem here.
 # Example:
 #   gem "activesupport", ">= 2.3.5"

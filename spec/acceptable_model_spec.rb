@@ -218,7 +218,13 @@ describe AcceptableModel do
         model.for('vnd.acme.sandwich-v1+json').should eql relationships.to_json
       end
 
-      it "can deal with XML formats the same as JSON formats"
+      it "can deal with XML formats the same as JSON formats" do
+        model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :aliases => ['Busta Bus'], :groups => ['Flipmode Squad', 'Leaders of The New School']
+        group1 = Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad'
+        group2 = Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school'
+        model.groups.stub(:all).and_return [group1, group2]
+        model.for('vnd.acme.sandwich-v1+xml').should eql "<id>busta-rhymes</id><name>Busta Rhymes</name><id>flipmode-squad</id><name>Flipmode Squad</name><href>/groups/flipmode-squad</href><rel>/children</rel><id>leaders-of-the-new-school</id><name>Leaders of The New School</name><href>/groups/leaders-of-the-new-school</href><rel>/children</rel><href>/artists/busta-rhymes</href><rel>/self</rel><href>/groups/flipmode-squad</href><rel>/partOf</rel><href>/groups/leaders-of-the-new-school</href><rel>/partOf</rel>"
+      end
       it "mime type not found"
     end
   end
