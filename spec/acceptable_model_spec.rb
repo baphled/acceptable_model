@@ -246,6 +246,12 @@ describe AcceptableModel do
         end
       end
 
+      after do
+        class AcceptableModel::Artist
+          undef part_of
+        end
+      end
+
       it "can extend the relationship links" do
         model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School']
         group1 = Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad'
@@ -276,6 +282,55 @@ describe AcceptableModel do
           model.for('vnd.acme.sandwich-v1+foo')
         }.to raise_error AcceptableModel::MimeTypeNotReckonised
       end
+
+    end
+    describe "#all" do
+      let(:relationships) {
+        [
+          {
+            :id => 'busta-rhymes',
+            :name => 'Busta Rhymes',
+            :links => [
+              {
+                :href => '/artists/busta-rhymes',
+                :rel => '/self'
+              }
+            ]
+          },
+          {
+            :id => 'jay-z',
+            :name => 'Jay-Z',
+            :links => [
+              {
+                :href => '/artists/jay-z',
+                :rel => '/self'
+              }
+            ]
+          },
+        ]
+      }
+      before :each do
+        class AcceptableModel::Artist
+          version ['vnd.acme.sandwich-v1+json'] do |artist|
+            {
+              :id => artist.id,
+              :name => artist.name
+            }
+          end
+        end
+
+        AcceptableModel::Artist.stub(:all).and_return [
+          AcceptableModel::Artist.new(:name => 'Busta Rhymes', :aliases => ['Busta Bus']),
+          AcceptableModel::Artist.new(:name => 'Jay-Z', :aliases => ['Jiggaman']),
+        ]
+      end
+
+      it "should be able to handle an array of objects that AcceptableModel knows about" do
+        artists = AcceptableModel::Artist.all
+        artists.for('vnd.acme.sandwich-v1+json').should eql relationships.to_json
+      end
+
+      it "should support XML also"
     end
   end
 end

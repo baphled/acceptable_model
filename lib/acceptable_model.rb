@@ -3,6 +3,24 @@ require "builder"
 require "delegate"
 require "json"
 
+#
+# FIXME: Probably not the best idea to reopen Array for this
+#
+class Array
+  #
+  # Allows us to call for when making a request for more than one model
+  #
+  # FIXME: Should not just return JSON
+  #
+  def for mime_type
+    self.collect do |model|
+      model.rel_links.each{|association| model.attributes.merge! association }
+      opts = {:links => model.relationships}
+      model.attributes.merge! opts
+    end.to_json
+  end
+end
+
 module AcceptableModel
   class MimeTypeNotReckonised < Exception
   end
@@ -111,8 +129,8 @@ module AcceptableModel
         raise MimeTypeNotReckonised.new mime_type if map.nil?
         mime = mime_type_lookup mime_type
         attributes = map[:attributes].call self
-        convert_to = "to_#{mime}".to_sym
-        send convert_to
+        format = "to_#{mime}".to_sym
+        send format
       end
 
       def mime_type_lookup mime_type
@@ -160,6 +178,15 @@ module AcceptableModel
         end
       end
 
+      #
+      # A list of the model relationships
+      #
+      def relationships
+        relationships = extended_relationships.collect! { |relationship| relationship_mapper relationship }
+        return base_relationship if relationships.empty?
+        relationships.unshift( base_relationship ).flatten!
+      end
+
       protected
 
       #
@@ -204,15 +231,6 @@ module AcceptableModel
             }
           ]
         }
-      end
-
-      #
-      # A list of the model relationships
-      #
-      def relationships
-        relationships = extended_relationships.collect! { |relationship| relationship_mapper relationship }
-        return base_relationship if relationships.empty?
-        relationships.unshift( base_relationship ).flatten!
       end
 
       #
