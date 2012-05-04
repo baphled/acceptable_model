@@ -145,20 +145,38 @@ module AcceptableModel
         super attributes
       end
 
+      #
+      # Build our XML response using builder
+      #
+      # FIXME:Should flag those attributes that should be wrapped in CDATA tags 
+      #
       def to_xml options = {}
         rel_links.each{|association| attributes.merge! association }
         opts = {:links => relationships}.merge! options
         attributes.merge! opts
-        xml = Builder::XmlMarkup.new :output => STDOUT
-        build_xml( xml, attributes ).target!
+        xml = Builder::XmlMarkup.new :indent => 2
+        xml.__send__(self.class.to_s.downcase.to_sym) do |model|
+          build_xml( model, attributes ).target!
+        end
       end
 
       protected
 
+      #
+      # Helper method used to build our XML response
+      #
+      # FIXME: This doesn't really belong here, need to find it at proper home
+      #
       def build_xml xml, attributes
         attributes.each do |k,v|
           if v.class == Array
-            v.each_with_index {|attr, index| build_xml xml,attr }
+            xml.__send__(k.to_sym) do |attribute|
+              v.each_with_index do |attr, index|
+                attribute.__send__(k.to_s.singularize.to_sym) do |singular|
+                  build_xml singular,attr
+                end
+              end
+            end
           else
             eval"xml.__send__(k.to_sym, v)"
           end

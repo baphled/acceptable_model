@@ -187,7 +187,51 @@ describe AcceptableModel do
         }
       }
 
-      before do
+      let(:expected_xml) {
+'''<artist>
+  <id>busta-rhymes</id>
+  <name>Busta Rhymes</name>
+  <groups>
+    <group>
+      <id>flipmode-squad</id>
+      <name>Flipmode Squad</name>
+      <links>
+        <link>
+          <href>/groups/flipmode-squad</href>
+          <rel>/children</rel>
+        </link>
+      </links>
+    </group>
+    <group>
+      <id>leaders-of-the-new-school</id>
+      <name>Leaders of The New School</name>
+      <links>
+        <link>
+          <href>/groups/leaders-of-the-new-school</href>
+          <rel>/children</rel>
+        </link>
+      </links>
+    </group>
+  </groups>
+  <links>
+    <link>
+      <href>/artists/busta-rhymes</href>
+      <rel>/self</rel>
+    </link>
+    <link>
+      <href>/groups/flipmode-squad</href>
+      <rel>/partOf</rel>
+    </link>
+    <link>
+      <href>/groups/leaders-of-the-new-school</href>
+      <rel>/partOf</rel>
+    </link>
+  </links>
+</artist>
+'''
+      }
+
+      before :each do
         class AcceptableModel::Artist
           version ['vnd.acme.sandwich-v1+json', 'vnd.acme.sandwich-v1+xml'] do |artist|
             {
@@ -223,7 +267,7 @@ describe AcceptableModel do
         group1 = Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad'
         group2 = Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school'
         model.groups.stub(:all).and_return [group1, group2]
-        model.for('vnd.acme.sandwich-v1+xml').should eql "<id>busta-rhymes</id><name>Busta Rhymes</name><id>flipmode-squad</id><name>Flipmode Squad</name><href>/groups/flipmode-squad</href><rel>/children</rel><id>leaders-of-the-new-school</id><name>Leaders of The New School</name><href>/groups/leaders-of-the-new-school</href><rel>/children</rel><href>/artists/busta-rhymes</href><rel>/self</rel><href>/groups/flipmode-squad</href><rel>/partOf</rel><href>/groups/leaders-of-the-new-school</href><rel>/partOf</rel>"
+        model.for('vnd.acme.sandwich-v1+xml').should eql expected_xml
       end
 
       it "mime type not found" do
