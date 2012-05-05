@@ -11,10 +11,6 @@ class Artist
     self.id = self.name.downcase.gsub(' ', '-')
   end
 
-  def to_json params = {}
-    attributes.merge!(params).to_json
-  end
-
   def attributes
     @attributes ||= {:id => id, :name => name}
   end
@@ -38,9 +34,6 @@ class Group
     @attributes ||= {:id => id, :name => name}
   end
 
-  def to_json params = {}
-    attributes.merge!(params).to_json
-  end
 end
 
 describe AcceptableModel do
@@ -262,7 +255,7 @@ describe AcceptableModel do
       end
 
       it "allows for the output format to be passed" do
-        model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :aliases => ['Busta Bus'], :groups => ['Flipmode Squad', 'Leaders of The New School']
+        model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School']
         group1 = Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad'
         group2 = Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school'
         model.groups.stub(:all).and_return [group1, group2]
@@ -270,7 +263,7 @@ describe AcceptableModel do
       end
 
       it "can deal with XML formats the same as JSON formats" do
-        model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :aliases => ['Busta Bus'], :groups => ['Flipmode Squad', 'Leaders of The New School']
+        model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School']
         group1 = Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad'
         group2 = Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school'
         model.groups.stub(:all).and_return [group1, group2]
@@ -279,7 +272,7 @@ describe AcceptableModel do
 
       it "mime type not found" do
         expect {
-          model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+          model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
           model.for('vnd.acme.sandwich-v1+foo')
         }.to raise_error AcceptableModel::MimeTypeNotReckonised
       end
@@ -321,8 +314,8 @@ describe AcceptableModel do
         end
 
         AcceptableModel::Artist.stub(:all).and_return [
-          AcceptableModel::Artist.new(:name => 'Busta Rhymes', :aliases => ['Busta Bus']),
-          AcceptableModel::Artist.new(:name => 'Jay-Z', :aliases => ['Jiggaman']),
+          AcceptableModel::Artist.new(:name => 'Busta Rhymes'),
+          AcceptableModel::Artist.new(:name => 'Jay-Z'),
         ]
       end
 
