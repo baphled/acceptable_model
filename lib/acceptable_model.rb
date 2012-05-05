@@ -1,4 +1,4 @@
-require "active_support/inflector"
+require "active_support/all"
 require "builder"
 require "delegate"
 require "json"
@@ -13,11 +13,15 @@ class Array
   # FIXME: Should not just return JSON
   #
   def for mime_type
-    self.collect do |model|
-      model.rel_links.each{|association| model.attributes.merge! association }
-      opts = {:links => model.relationships}
-      model.attributes.merge! opts
-    end.to_json
+    mime = self.first.mime_type_lookup mime_type
+    class_name = self.first.class.to_s.downcase.pluralize
+    format = "to_#{mime}".to_sym
+    collect do |model|
+      map = model.version_lookup mime_type
+      attributes = map[:attributes].call model
+      model.rel_links.each{|association| attributes.merge! association }
+      model.attributes.merge!( {:links => model.relationships} )
+    end.send format, :skip_types => true, :root => class_name
   end
 end
 
@@ -172,10 +176,7 @@ module AcceptableModel
         rel_links.each{|association| attributes.merge! association }
         opts = {:links => relationships}.merge! options
         attributes.merge! opts
-        xml = Builder::XmlMarkup.new :indent => 2
-        xml.__send__(self.class.to_s.downcase.to_sym) do |model|
-          build_xml( model, attributes ).target!
-        end
+        attributes.to_xml :skip_types => true, :root => self.class.to_s.downcase
       end
 
       #
@@ -188,28 +189,6 @@ module AcceptableModel
       end
 
       protected
-
-      #
-      # Helper method used to build our XML response
-      #
-      # FIXME: This doesn't really belong here, need to find it at proper home
-      #
-      def build_xml xml, attributes
-        attributes.each do |k,v|
-          if v.class == Array
-            xml.__send__(k.to_sym) do |attribute|
-              v.each_with_index do |attr, index|
-                attribute.__send__(k.to_s.singularize.to_sym) do |singular|
-                  build_xml singular,attr
-                end
-              end
-            end
-          else
-            eval"xml.__send__(k.to_sym, v)"
-          end
-        end
-        xml
-      end
 
       def build_association association
         {

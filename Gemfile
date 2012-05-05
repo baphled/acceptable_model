@@ -1,6 +1,7 @@
 source "http://rubygems.org"
 
 gem 'active_support'
+gem 'i18n'
 gem 'builder'
 # Add dependencies required to use your gem here.
 # Example:

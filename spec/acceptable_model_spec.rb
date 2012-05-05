@@ -188,7 +188,8 @@ describe AcceptableModel do
       }
 
       let(:expected_xml) {
-'''<artist>
+'''<?xml version="1.0" encoding="UTF-8"?>
+<artist>
   <id>busta-rhymes</id>
   <name>Busta Rhymes</name>
   <groups>
@@ -311,7 +312,7 @@ describe AcceptableModel do
       }
       before :each do
         class AcceptableModel::Artist
-          version ['vnd.acme.sandwich-v1+json'] do |artist|
+          version ['vnd.acme.sandwich-v1+json','vnd.acme.sandwich-v1+xml'] do |artist|
             {
               :id => artist.id,
               :name => artist.name
@@ -330,7 +331,35 @@ describe AcceptableModel do
         artists.for('vnd.acme.sandwich-v1+json').should eql relationships.to_json
       end
 
-      it "should support XML also"
+      it "should support XML also" do
+        expected = 
+'''<?xml version="1.0" encoding="UTF-8"?>
+<artists>
+  <artist>
+    <id>busta-rhymes</id>
+    <name>Busta Rhymes</name>
+    <links>
+      <link>
+        <href>/artists/busta-rhymes</href>
+        <rel>/self</rel>
+      </link>
+    </links>
+  </artist>
+  <artist>
+    <id>jay-z</id>
+    <name>Jay-Z</name>
+    <links>
+      <link>
+        <href>/artists/jay-z</href>
+        <rel>/self</rel>
+      </link>
+    </links>
+  </artist>
+</artists>
+'''
+        artists = AcceptableModel::Artist.all
+        artists.for('vnd.acme.sandwich-v1+xml').should eql expected
+      end
     end
   end
 end
