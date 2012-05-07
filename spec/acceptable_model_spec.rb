@@ -65,7 +65,10 @@ describe AcceptableModel do
         artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
       end
 
-      it "is returning XML"
+      it "is returning XML" do
+        artist.to_xml
+        artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+      end
     end
   end
   describe "#define" do

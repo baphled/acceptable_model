@@ -161,7 +161,7 @@ module AcceptableModel
       #
       def to_json options = {}
         rel_links.each{|association| attributes.merge! association }
-        opts = {:links => relationships}.merge! options
+        opts = {:links => relationships}.merge options
         attributes.merge(opts).to_json
       end
 
@@ -172,9 +172,8 @@ module AcceptableModel
       #
       def to_xml options = {}
         rel_links.each{|association| attributes.merge! association }
-        opts = {:links => relationships}.merge! options
-        attributes.merge! opts
-        attributes.to_xml :skip_types => true, :root => self.class.to_s.downcase
+        opts = {:links => relationships}.merge options
+        attributes.merge(opts).to_xml :skip_types => true, :root => self.class.to_s.downcase
       end
 
       #
