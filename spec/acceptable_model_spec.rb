@@ -75,6 +75,12 @@ describe AcceptableModel do
         AcceptableModel::Artist.new :name => 'Busta Rhymes'
       }.to_not raise_error Exception
     end
+
+    it "can only define if the model is defined" do
+      expect {
+        AcceptableModel.define 'gopher'
+      }.to raise_error AcceptableModel::ModelNotFound
+    end
   end
 
   context "a dynamically defined class" do
