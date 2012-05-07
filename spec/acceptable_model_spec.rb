@@ -90,7 +90,7 @@ describe AcceptableModel do
     end
   end
 
-  context "define associative relationships" do
+  context "defining associative relationships" do
     before do
       class AcceptableModel::Artist
         relationship :group

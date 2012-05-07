@@ -5,7 +5,7 @@ require "acceptable_model/exceptions"
 
 module AcceptableModel
   #
-  # HATEOS based presentation for models
+  # HATEOS based representation for models
   #
   module HATEOS
     class << self
@@ -19,29 +19,63 @@ module AcceptableModel
       #
       attr_accessor :relationship_types
 
+      #
+      # Simple configuration block to allow interface users to define their own
+      # custom relationships
+      #
       def configure
         yield self
         true
       end
-
       alias :config :configure
 
+      #
+      # A list of all relationship types that the module knows about
+      #
       def relationship_types
         @relationship_types = %w{part_of parent child contains prev next same_as}
-        @relationship_types = @relationship_types | AcceptableModel::HATEOS.relationships unless AcceptableModel::HATEOS.relationships.nil?
+        merge_relationships
+      end
+
+      protected
+
+      #
+      # Merge pre-defined relationships with those created by the interface
+      # user
+      #
+      def merge_relationships
+        @relationship_types.concat relationships if relationships
         @relationship_types
       end
     end
 
     module InstanceMethods
       attr_accessor :base_relationship
-      attr_accessor :associations
+      private :base_relationship=
 
+      #
+      # All the associations the AcceptableModel should know about
+      # 
+      attr_accessor :associations
+      private :associations=
+
+      #
+      # A list of all relationships the AcceptableModel is aware of
+      #
       attr_accessor :relationships
       private :relationships=
 
       #
-      # returns the correct response type and API version
+      # Returns the correct response type in the expected format
+      #
+      # As long the mapping is similar to custom mime types and at least
+      # follow the below example we are easily able to differentiate between
+      # differing representations of a model.
+      #
+      # e.g. /*v1+json$/
+      #
+      # We are free to represent varying versions of a system without
+      # complicating our models, controllers or duplicating our code base 
       #
       def for mime_type
         map  = version_lookup mime_type
@@ -52,11 +86,19 @@ module AcceptableModel
         send format
       end
 
+      #
+      # Looks up the format that the response should be returned as
+      #
       def mime_type_lookup mime_type
         respond_with = version_lookup mime_type
         mime_type.split('+').last unless respond_with.nil?
       end
 
+      #
+      # Looks up the representational version that should be returned
+      #
+      # This allows the interface user to have differing versions of the same model
+      #
       def version_lookup mime_type
         mappers = eval( "AcceptableModel::#{ self.class }" ).version_mapper
         mappers.detect { |mapper| mime_type == mapper[:version] }
@@ -72,8 +114,8 @@ module AcceptableModel
       end
 
       #
-      # Overide the models to_json method so that we can can display our
-      # serialised data
+      # Override the models to_json method so that we can can display our
+      # HATEOS formatted data
       #
       def to_json options = {}
         rel_links.each{|association| attributes.merge! association }
@@ -85,6 +127,7 @@ module AcceptableModel
       # Build our XML response using builder
       #
       # FIXME:Should flag those attributes that should be wrapped in CDATA tags 
+      # FIXME links should be in the HTML link format ('<link href="http://google.com" rel="parent" />') 
       #
       def to_xml options = {}
         rel_links.each{|association| attributes.merge! association }
@@ -111,17 +154,20 @@ module AcceptableModel
           }
         }
       end
+
       #
       # Dynamically builds associative relationships
+      #
+      # FIXME: Should be able to define link relationships
       #
       def build_relationship model, association
         {
           :links => [
             {
-          :href => "/#{association.pluralize}/#{model.id}",
-          :rel => "/children"
-        }
-        ]
+              :href => "/#{association.pluralize}/#{model.id}",
+              :rel => "/children"
+            }
+          ]
         }
       end
 
@@ -157,9 +203,9 @@ module AcceptableModel
       def base_relationship
         [
           {
-          :href => "/#{self.class.to_s.downcase.pluralize}/#{id}",
-          :rel => '/self'
-        }
+            :href => "/#{self.class.to_s.downcase.pluralize}/#{id}",
+            :rel => '/self'
+          }
         ]
       end
     end
