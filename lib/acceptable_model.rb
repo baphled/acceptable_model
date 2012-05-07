@@ -10,8 +10,6 @@ class Array
   #
   # Allows us to call for when making a request for more than one model
   #
-  # FIXME: Should not just return JSON
-  #
   def for mime_type
     mime = self.first.mime_type_lookup mime_type
     class_name = self.first.class.to_s.downcase.pluralize
