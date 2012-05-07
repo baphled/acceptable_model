@@ -13,7 +13,10 @@ So we have a model, that has a few associations and accessors
 
       def initialize params = {}
         self.id = params[:name]
-        self.attributes.merge! self.id
+        self.songs = params[:songs]
+        self.debut = params[:debut]
+        self.attributes = :id => self.id
+        self.attributes.merge! params
       end
 
       def albums
@@ -54,7 +57,139 @@ a Presenter like object that deals with the models presentation features
 This is how we like it, our models shouldn't know about presentation logic
 
 By default AcceptableModel::Artist will include all accessor methods that the Artist
-class exposes.
+class exposes whilst knowing about how to deal with the models
+relationships and representing this in a HATEOS format.
+
+### Separating presentation with versioning
+
+This is all well and good but we may want to version our responses and
+respond differently dependantly on the format and version specified by a
+user.
+
+Typically we would put these details in our controllers or create
+seperate views.
+
+AcceptableModel takes this one step further and totally removes the need
+for either by providing a simple DSL to allow you to specify the
+expected responses dependant on the version provided.
+
+    class AcceptableModel::Artist
+      api ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
+        {
+          :id => artist.id,
+          :name => artist.name
+        }
+      end
+
+      api ['vnd.acme.artist-v2-json'] do |artist|
+        {
+          :id => artist.name,
+          :name => artist.name
+        }
+      end
+
+      def part_of
+        groups.all
+      end
+    end
+
+AcceptableModel doesn't try to deal with HTTP requests, it merely
+creates a wrapper object that replicates the HATEOS response format, so
+calling `artist.for('vnd.acme.artist-v1+json')` returns the following response:
+
+    {
+      'id': 'busta-rhymes',
+      'name': 'Busta Rhymes',
+      'debut': '1990',
+      'groups' => [
+        {
+          'id' => 'flipmode-squad',
+          'name' => 'Flipmode Squad',
+          'links' => [
+            {
+             'href' => '/groups/flipmode-squad',
+             'rel' => '/children'
+            }
+          ]
+        },
+        {
+          'id' => 'leaders-of-the-new-school',
+          'name' => 'Leaders of The New School',
+          'links' => [
+            {
+             'href' => '/groups/leaders-of-the-new-school',
+             'rel' => '/children'
+            }
+          ]
+        }
+      ],
+      'links': [
+        {
+          'href': '/artists/busta_rhymes',
+          'rel': '/self'
+        },
+        {
+          'href': '/collections/leaders-of-the-new-school',
+          'rel': '/partOf'
+        },
+        {
+          'href': '/collections/flipmode-squad',
+          'rel': '/partOf'
+        }
+      ]
+    }
+
+or calling `artist.for('vnd.acme.artist-v1+xml')` would yield:
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <artist>
+      <id>busta-rhymes</id>
+      <name>Busta Rhymes</name>
+      <groups>
+        <group>
+          <id>flipmode-squad</id>
+          <name>Flipmode Squad</name>
+          <links>
+            <link>
+              <href>/groups/flipmode-squad</href>
+              <rel>/children</rel>
+            </link>
+          </links>
+        </group>
+        <group>
+          <id>leaders-of-the-new-school</id>
+          <name>Leaders of The New School</name>
+          <links>
+            <link>
+              <href>/groups/leaders-of-the-new-school</href>
+              <rel>/children</rel>
+            </link>
+          </links>
+        </group>
+      </groups>
+      <links>
+        <link>
+          <href>/artists/busta-rhymes</href>
+          <rel>/self</rel>
+        </link>
+        <link>
+          <href>/groups/flipmode-squad</href>
+          <rel>/partOf</rel>
+        </link>
+        <link>
+          <href>/groups/leaders-of-the-new-school</href>
+          <rel>/partOf</rel>
+        </link>
+      </links>
+    </artist>
+
+AcceptableModel can also use custom mime types determine the mime type
+version to be requested. This in turn allows us to keep varying versions
+models encapsulated as well as keeping our services scaleable
+
+As this is the case you can simple call #for on the instance variable
+and pass it the custom mime type and AcceptableModel will work out which
+mime type and version should be returned.
 
 ### Adding relationships
 
@@ -64,7 +199,6 @@ own Re-open the defined class and simple create your own relationship.
 
     class AcceptableModel::Artist
 
-      # /partOf
       #
       # It doesn't matter whether the method returns an Array, or object as
       # long as it has an id
@@ -74,7 +208,6 @@ own Re-open the defined class and simple create your own relationship.
       end 
 
       #
-      # /child
       #
       # The link is assumed by the name of the originating class and the
       # objects id
@@ -93,7 +226,6 @@ own Re-open the defined class and simple create your own relationship.
 Defining these methods exposes the objects relationships, visiting the resource
 
     artist = AcceptableModel::Artist.first
-    Artist.to_json
 
 exposes the following response.
 
