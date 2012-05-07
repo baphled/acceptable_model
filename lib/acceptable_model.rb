@@ -18,9 +18,10 @@ class Array
     format = "to_#{mime}".to_sym
     collect do |model|
       map = model.version_lookup mime_type
-      attributes = map[:attributes].call model
-      model.rel_links.each{|association| attributes.merge! association }
+      model.attributes = map[:attributes].call model
+      model.rel_links.each{|association| model.attributes.merge! association }
       model.attributes.merge!( {:links => model.relationships} )
+      model.attributes
     end.send format, :skip_types => true, :root => class_name
   end
 end
@@ -164,7 +165,7 @@ module AcceptableModel
         rel_links.each{|association| attributes.merge! association }
         opts = {:links => relationships}.merge! options
         attributes.merge! opts
-        super attributes
+        attributes.to_json
       end
 
       #

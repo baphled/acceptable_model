@@ -3,18 +3,16 @@ require "acceptable_model"
 
 class Artist
   attr_accessor :name, :aliases, :id, :groups
+  attr_accessor :attributes
 
   def initialize params = {}
     self.name = params[:name]
     self.aliases = params[:aliases]
     self.groups = params[:groups]
     self.id = self.name.downcase.gsub(' ', '-')
+    self.attributes = { :id => self.id }
+    self.attributes.merge! params
   end
-
-  def attributes
-    @attributes ||= {:id => id, :name => name}
-  end
-  alias :to_hash :attributes
 
   protected
 
@@ -25,9 +23,13 @@ end
 
 class Group
   attr_accessor :name, :id
+  attr_accessor :attributes
+
   def initialize params = {}
     self.name = params[:name]
     self.id = self.name.downcase.gsub(' ', '-')
+    self.attributes = { :id => self.id }
+    self.attributes.merge! params
   end
 
   def attributes
