@@ -1,40 +1,9 @@
-require "active_support/all"
-require "builder"
 require "delegate"
-require "json"
+
+require "acceptable_model/hateos"
+require "acceptable_model/enumerable"
 
 module AcceptableModel
-  class MimeTypeNotReckonised < Exception
-  end
-  #
-  # Enumerate all model so that we can treat a collection of models the same as
-  # we do with one
-  #
-  class Enumerable < Array
-    #
-    # Allows us to call for when making a request for more than one model
-    #
-    def for mime_type
-      mime = self.first.mime_type_lookup mime_type
-      class_name = self.first.class.to_s.downcase.pluralize
-      format = "to_#{mime}".to_sym
-      attributes_for(mime_type).send format, :skip_types => true, :root => class_name
-    end
-
-    def attributes_for mime_type
-      collect do |model|
-        map = model.version_lookup mime_type
-        model_attributes model, map[:attributes].call(model)
-      end
-    end
-
-    def model_attributes model, attributes
-      model.rel_links.each{|association| attributes.merge! association }
-      attributes.merge!( {:links => model.relationships} )
-      attributes
-    end
-  end
-
   #
   # Define the Class that we want to define as having a relationship
   #
@@ -44,10 +13,22 @@ module AcceptableModel
     eval define_class dynamic_name
   end
 
+  #
+  # Dynamically define our presentational object
+  #
+  # We delegate to our original model so that we can get access to all of it's
+  # business logic so that we don't have to worry about mixing presentational
+  # details with business logic
+  #
   def self.define_class model_object
     """
     class #{model_object} < SimpleDelegator
       include HATEOS
+
+      def initialize params
+        @delegate_model = ::#{model_object}.new params
+        super @delegate_model
+      end
 
       class << self
         attr_accessor :associations, :version_mapper
@@ -71,6 +52,10 @@ module AcceptableModel
           @associations << association.to_s unless @associations.include? association.to_s
         end
 
+        #
+        # Overide the models #all method so that we can extend the array with
+        # our own functionality
+        #
         def all
           models = super
           AcceptableModel::Enumerable.new models
@@ -84,11 +69,6 @@ module AcceptableModel
         end
       end
 
-      def initialize params
-        @delegate_model = ::#{model_object}.new params
-        super @delegate_model
-      end
-
       def to_model
         __getobj__
       end
@@ -96,173 +76,7 @@ module AcceptableModel
       def class
         __getobj__.class
       end
-
     end
     """
-  end
-
-  #
-  # HATEOS based presentation for models
-  #
-  module HATEOS
-
-    class << self
-      #
-      # Configuration variables
-      #
-      attr_accessor :relationships
-
-      #
-      # A complete list of relationship types to look for
-      #
-      attr_accessor :relationship_types
-
-      def configure
-        yield self
-        true
-      end
-      alias :config :configure
-
-      def relationship_types
-        @relationship_types = %w{part_of parent child contains prev next same_as}
-        @relationship_types = @relationship_types | AcceptableModel::HATEOS.relationships unless AcceptableModel::HATEOS.relationships.nil?
-        @relationship_types
-      end
-    end
-
-    module InstanceMethods
-      attr_accessor :base_relationship
-      attr_accessor :associations
-
-      attr_accessor :relationships
-      private :relationships=
-
-      #
-      # returns the correct response type and API version
-      #
-      def for mime_type
-        map  = version_lookup mime_type
-        raise MimeTypeNotReckonised.new mime_type if map.nil?
-        mime = mime_type_lookup mime_type
-        attributes = map[:attributes].call self
-        format = "to_#{mime}".to_sym
-        send format
-      end
-
-      def mime_type_lookup mime_type
-        respond_with = version_lookup mime_type
-        mime_type.split('+').last unless respond_with.nil?
-      end
-
-      def version_lookup mime_type
-        mappers = eval( "AcceptableModel::#{ self.class }" ).version_mapper
-        mappers.detect { |mapper| mime_type == mapper[:version] }
-      end
-
-      def rel_links
-        associations = eval( "AcceptableModel::#{ self.class }" ).associations
-        return [] if associations.nil?
-        associations.collect { |association| 
-          return [] if send(association.pluralize.to_sym).nil?
-          build_association association
-        }
-      end
-
-      #
-      # Overide the models to_json method so that we can can display our
-      # serialised data
-      #
-      def to_json options = {}
-        rel_links.each{|association| attributes.merge! association }
-        opts = {:links => relationships}.merge options
-        attributes.merge(opts).to_json
-      end
-
-      #
-      # Build our XML response using builder
-      #
-      # FIXME:Should flag those attributes that should be wrapped in CDATA tags 
-      #
-      def to_xml options = {}
-        rel_links.each{|association| attributes.merge! association }
-        opts = {:links => relationships}.merge options
-        attributes.merge(opts).to_xml :skip_types => true, :root => self.class.to_s.downcase
-      end
-
-      #
-      # A list of the model relationships
-      #
-      def relationships
-        relationships = extended_relationships.collect! { |relationship| relationship_mapper relationship }
-        return base_relationship if relationships.empty?
-        relationships.unshift( base_relationship ).flatten!
-      end
-
-      protected
-
-      def build_association association
-        {
-          association.pluralize.to_sym => 
-          send(association.pluralize.to_sym).collect { |model| 
-            model.attributes.merge! build_relationship model, association
-          }
-        }
-      end
-      #
-      # Dynamically builds associative relationships
-      #
-      def build_relationship model, association
-        {
-          :links => [
-            {
-              :href => "/#{association.pluralize}/#{model.id}",
-              :rel => "/children"
-            }
-          ]
-        }
-      end
-
-      #
-      # Gather a list of relationships created by the user
-      #
-      def extended_relationships
-        HATEOS.relationship_types.select { |type| extended_relationship? type }
-      end
-
-      #
-      # Check that the object has the relationship defined
-      #
-      def extended_relationship? relationship
-        self.public_methods(false).include? relationship.to_sym
-      end
-
-      #
-      # Maps the relationship to the format we expect
-      #
-      def relationship_mapper relationship
-        send(relationship.to_sym).collect { |part| 
-          {
-            :href => "/#{part.class.to_s.downcase.pluralize}/#{part.id}",
-            :rel => "/#{relationship.camelize :lower}"
-          }
-        }
-      end
-
-      #
-      # Our response object always has a reference to itself
-      #
-      def base_relationship
-         [
-           {
-             :href => "/#{self.class.to_s.downcase.pluralize}/#{id}",
-             :rel => '/self'
-           }
-         ]
-      end
-    end
-
-    def self.included(receiver)
-      receiver.send :include, InstanceMethods
-    end
   end
 end
