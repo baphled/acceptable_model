@@ -12,6 +12,11 @@ module AcceptableModel
       #
       # Configuration variables
       #
+       
+      #
+      # Allows interface users to specify which relationships should be
+      # returned when
+      #
       attr_accessor :relationships
 
       #
@@ -44,15 +49,11 @@ module AcceptableModel
       # user
       #
       def merge_relationships
-        @relationship_types.concat relationships if relationships
-        @relationship_types
+        (relationships)? @relationship_types.concat( relationships ) : @relationship_types
       end
     end
 
     module InstanceMethods
-      attr_accessor :base_relationship
-      private :base_relationship=
-
       #
       # All the associations the AcceptableModel should know about
       # 
