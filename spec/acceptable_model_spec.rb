@@ -54,6 +54,20 @@ describe AcceptableModel do
     AcceptableModel::HATEOS.relationship_types.should include 'service'
   end
 
+  describe "#attributes" do
+    it "stores the models attributes"
+    context "should not alter the original models attributes" do
+      let(:artist) {
+        AcceptableModel::Artist.new :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+      }
+      it "is returning JSON" do
+        artist.to_json
+        artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+      end
+
+      it "is returning XML"
+    end
+  end
   describe "#define" do
     it "dyanmically defines a new class" do
       expect {

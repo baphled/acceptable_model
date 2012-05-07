@@ -162,8 +162,7 @@ module AcceptableModel
       def to_json options = {}
         rel_links.each{|association| attributes.merge! association }
         opts = {:links => relationships}.merge! options
-        attributes.merge! opts
-        attributes.to_json
+        attributes.merge(opts).to_json
       end
 
       #
