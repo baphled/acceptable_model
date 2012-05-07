@@ -4,18 +4,7 @@ describe AcceptableModel do
   before :each do
     AcceptableModel.define 'artist'
   end
-
-  it "should have a list of rel types" do
-    AcceptableModel::HATEOS.relationship_types.should eql %w{part_of parent child contains prev next same_as}
-  end
   
-  it "allows us to add our own rel types" do
-    AcceptableModel::HATEOS.config do |config|
-      config.relationships = %w{service}
-    end
-    AcceptableModel::HATEOS.relationship_types.should include 'service'
-  end
-
   describe "#attributes" do
     context "should not alter the original models attributes" do
       let(:artist) { AcceptableModel::Artist.new :name => 'Busta Rhymes', :aliases => ['Busta Bus'] }
@@ -26,24 +15,19 @@ describe AcceptableModel do
       before do
         class AcceptableModel::Artist
           version ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
-            {
-              :id => artist.id,
-              :name => artist.name
-            }
+            { :id => artist.id, :name => artist.name }
           end
         end
       end
 
-      context "returning single models" do
-        it "is returning JSON" do
-          artist.to_json
-          artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
-        end
+      it "#to_json is called" do
+        artist.to_json
+        artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+      end
 
-        it "is returning XML" do
-          artist.to_xml
-          artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
-        end
+      it "#to_xml is called" do
+        artist.to_xml
+        artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
       end
     end
   end
@@ -64,59 +48,6 @@ describe AcceptableModel do
     it "exposes the originating models accessors" do
       model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
       model.name.should eql 'Busta Rhymes'
-    end
-  end
-
-  describe "#relationship" do
-    before do
-      class AcceptableModel::Artist
-        relationship :group
-      end
-    end
-
-    it "lists the objects relationships" do
-      AcceptableModel::Artist.associations.should include 'group'
-    end
-
-    it "should have a list of associations" do
-      AcceptableModel::Artist.associations.should be_a Array
-    end
-
-    it "should allow use to define a relationship" do
-      expected = {
-        'id' => 'busta-rhymes',
-        'name' => 'Busta Rhymes',
-        'groups' => [
-          {
-            'id' => 'flipmode-squad',
-            'name' => 'Flipmode Squad',
-            'links' => [
-              {
-               'href' => '/groups/flipmode-squad',
-               'rel' => '/children'
-              }
-            ]
-          },
-          {
-            'id' => 'leaders-of-the-new-school',
-            'name' => 'Leaders of The New School',
-            'links' => [
-              {
-               'href' => '/groups/leaders-of-the-new-school',
-               'rel' => '/children'
-              }
-            ]
-          }
-        ],
-        :links => [
-          {
-            :href => '/artists/busta-rhymes',
-            :rel => '/self'
-          }
-        ]
-      }.to_json
-      model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School']
-      model.to_json.should eql expected
     end
   end
 
@@ -200,6 +131,8 @@ describe AcceptableModel do
             }
           end
 
+          relationship :group
+
           def part_of
             groups.all
           end
@@ -207,7 +140,7 @@ describe AcceptableModel do
         model.groups.stub(:all).and_return [group1, group2]
       end
 
-      after do
+      after :each do
         class AcceptableModel::Artist
           undef part_of
         end

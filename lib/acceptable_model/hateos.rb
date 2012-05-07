@@ -66,27 +66,6 @@ module AcceptableModel
       private :relationships=
 
       #
-      # Returns the correct response type in the expected format
-      #
-      # As long the mapping is similar to custom mime types and at least
-      # follow the below example we are easily able to differentiate between
-      # differing representations of a model.
-      #
-      # e.g. /*v1+json$/
-      #
-      # We are free to represent varying versions of a system without
-      # complicating our models, controllers or duplicating our code base 
-      #
-      def for mime_type
-        map  = version_lookup mime_type
-        raise MimeTypeNotReckonised.new mime_type if map.nil?
-        mime = mime_type_lookup mime_type
-        attributes = map[:attributes].call self
-        format = "to_#{mime}".to_sym
-        send format
-      end
-
-      #
       # Looks up the format that the response should be returned as
       #
       def mime_type_lookup mime_type
@@ -104,6 +83,15 @@ module AcceptableModel
         mappers.detect { |mapper| mime_type == mapper[:version] }
       end
 
+      #
+      # A list of the model relationships
+      #
+      def relationships
+        relationships = extended_relationships.collect! { |relationship| relationship_mapper relationship }
+        return base_relationship if relationships.empty?
+        relationships.unshift( base_relationship ).flatten!
+      end
+
       def rel_links
         associations = eval( "AcceptableModel::#{ self.class }" ).associations
         return [] if associations.nil?
@@ -118,8 +106,7 @@ module AcceptableModel
       # HATEOS formatted data
       #
       def to_json options = {}
-        rel_links.each{|association| attributes.merge! association }
-        opts = {:links => relationships}.merge options
+        opts = collect_attributes options
         attributes.merge(opts).to_json
       end
 
@@ -130,21 +117,16 @@ module AcceptableModel
       # FIXME links should be in the HTML link format ('<link href="http://google.com" rel="parent" />') 
       #
       def to_xml options = {}
-        rel_links.each{|association| attributes.merge! association }
-        opts = {:links => relationships}.merge options
+        opts = collect_attributes options
         attributes.merge(opts).to_xml :skip_types => true, :root => self.class.to_s.downcase
       end
 
-      #
-      # A list of the model relationships
-      #
-      def relationships
-        relationships = extended_relationships.collect! { |relationship| relationship_mapper relationship }
-        return base_relationship if relationships.empty?
-        relationships.unshift( base_relationship ).flatten!
-      end
-
       protected
+
+      def collect_attributes options
+        rel_links.each{|association| attributes.merge! association }
+        {:links => relationships}.merge options
+      end
 
       def build_association association
         {

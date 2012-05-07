@@ -31,6 +31,29 @@ module AcceptableModel
         super @delegate_model
       end
 
+      #
+      # Returns the correct response type in the expected format
+      #
+      # As long the mapping is similar to custom mime types and at least
+      # follow the below example we are easily able to differentiate between
+      # differing representations of a model.
+      #
+      # e.g. /*v1+json$/
+      #
+      # We are free to represent varying versions of a system without
+      # complicating our models, controllers or duplicating our code base 
+      #
+      # FIXME Should move to the dynamically defined class
+      #
+      def for mime_type
+        map  = version_lookup mime_type
+        raise MimeTypeNotReckonised.new mime_type if map.nil?
+        mime = mime_type_lookup mime_type
+        attributes = map[:attributes].call self
+        format = 'to_' + mime
+        send format.to_sym
+      end
+
       class << self
         attr_accessor :associations, :version_mapper
 
