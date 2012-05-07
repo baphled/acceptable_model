@@ -1,42 +1,4 @@
-require "acceptable_model"
-
-
-class Artist
-  attr_accessor :name, :aliases, :id, :groups
-  attr_accessor :attributes
-
-  def initialize params = {}
-    self.name = params[:name]
-    self.aliases = params[:aliases]
-    self.groups = params[:groups]
-    self.id = self.name.downcase.gsub(' ', '-')
-    self.attributes = { :id => self.id }
-    self.attributes.merge! params
-  end
-
-  protected
-
-  def groups= groups
-    @groups = groups.collect {|group| Group.new :name => group} unless groups.nil?
-  end
-end
-
-class Group
-  attr_accessor :name, :id
-  attr_accessor :attributes
-
-  def initialize params = {}
-    self.name = params[:name]
-    self.id = self.name.downcase.gsub(' ', '-')
-    self.attributes = { :id => self.id }
-    self.attributes.merge! params
-  end
-
-  def attributes
-    @attributes ||= {:id => id, :name => name}
-  end
-
-end
+require "spec_helper"
 
 describe AcceptableModel do
   before :each do
