@@ -86,10 +86,11 @@ describe AcceptableModel do
 
       context "returning all" do
         before do
-          AcceptableModel::Artist.stub(:all).and_return [
+          artist_enum = AcceptableModel::Enumerable.new [
             AcceptableModel::Artist.new(:name => 'Busta Rhymes', :aliases => ['Busta Bus']),
             AcceptableModel::Artist.new(:name => 'Jay-Z', :aliases => ['Jiggaman']),
           ]
+          AcceptableModel::Artist.stub(:all).and_return artist_enum
         end
         it "is returning JSON" do
           artists.for('vnd.acme.artist-v1+json')
@@ -106,6 +107,19 @@ describe AcceptableModel do
     end
   end
 
+  describe "Enumerable" do
+    before do
+      artist_enum = [
+        AcceptableModel::Artist.new(:name => 'Busta Rhymes', :aliases => ['Busta Bus']),
+        AcceptableModel::Artist.new(:name => 'Jay-Z', :aliases => ['Jiggaman']),
+      ]
+      Artist.stub(:all).and_return artist_enum
+    end
+
+    it "enumerates all models" do
+      AcceptableModel::Artist.all.should be_an AcceptableModel::Enumerable
+    end
+  end
   describe "#define" do
     it "dyanmically defines a new class" do
       expect {
@@ -358,10 +372,11 @@ describe AcceptableModel do
           end
         end
 
-        AcceptableModel::Artist.stub(:all).and_return [
+        artist_enum = AcceptableModel::Enumerable.new [
           AcceptableModel::Artist.new(:name => 'Busta Rhymes', :aliases => ['Busta Bus']),
           AcceptableModel::Artist.new(:name => 'Jay-Z', :aliases => ['Jiggaman']),
         ]
+        AcceptableModel::Artist.stub(:all).and_return artist_enum
       end
 
       it "should be able to handle an array of objects that AcceptableModel knows about" do

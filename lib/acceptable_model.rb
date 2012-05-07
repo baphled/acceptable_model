@@ -3,34 +3,38 @@ require "builder"
 require "delegate"
 require "json"
 
-#
-# FIXME: Probably not the best idea to reopen Array for this
-#
-class Array
-  #
-  # Allows us to call for when making a request for more than one model
-  #
-  def for mime_type
-    mime = self.first.mime_type_lookup mime_type
-    class_name = self.first.class.to_s.downcase.pluralize
-    format = "to_#{mime}".to_sym
-    attributes_for(mime_type).send format, :skip_types => true, :root => class_name
+module AcceptableModel
+  class MimeTypeNotReckonised < Exception
   end
+  #
+  # Enumerate all model so that we can treat a collection of models the same as
+  # we do with one
+  #
+  class Enumerable < Array
+    #
+    # Allows us to call for when making a request for more than one model
+    #
+    def for mime_type
+      mime = self.first.mime_type_lookup mime_type
+      class_name = self.first.class.to_s.downcase.pluralize
+      format = "to_#{mime}".to_sym
+      attributes_for(mime_type).send format, :skip_types => true, :root => class_name
+    end
 
-  def attributes_for mime_type
-    collect do |model|
-      map = model.version_lookup mime_type
-      attributes = map[:attributes].call model
+    def attributes_for mime_type
+      collect do |model|
+        map = model.version_lookup mime_type
+        model_attributes model, map[:attributes].call(model)
+      end
+    end
+
+    def model_attributes model, attributes
       model.rel_links.each{|association| attributes.merge! association }
       attributes.merge!( {:links => model.relationships} )
       attributes
     end
   end
-end
 
-module AcceptableModel
-  class MimeTypeNotReckonised < Exception
-  end
   #
   # Define the Class that we want to define as having a relationship
   #
@@ -65,6 +69,11 @@ module AcceptableModel
         def relationship association
           @associations = [] if @associations.nil?
           @associations << association.to_s unless @associations.include? association.to_s
+        end
+
+        def all
+          models = super
+          AcceptableModel::Enumerable.new models
         end
 
         #
