@@ -25,7 +25,7 @@ module AcceptableModel
     end
 
     def model_attributes model, attributes
-      model.rel_links.each{|association| attributes.merge! association }
+      model.relationship_links.each{|association| attributes.merge! association }
       attributes.merge!( {:links => model.relationships} )
       attributes
     end

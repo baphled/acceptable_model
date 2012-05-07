@@ -92,7 +92,7 @@ module AcceptableModel
         relationships.unshift( base_relationship ).flatten!
       end
 
-      def rel_links
+      def relationship_links
         associations = eval( "AcceptableModel::#{ self.class }" ).associations
         return [] if associations.nil?
         associations.collect { |association| 
@@ -124,7 +124,7 @@ module AcceptableModel
       protected
 
       def collect_attributes options
-        rel_links.each{|association| attributes.merge! association }
+        relationship_links.each{|association| attributes.merge! association }
         {:links => relationships}.merge options
       end
 
