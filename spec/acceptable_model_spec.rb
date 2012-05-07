@@ -45,27 +45,6 @@ describe AcceptableModel do
           artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
         end
       end
-
-      context "returning all" do
-        before do
-          artist_enum = AcceptableModel::Enumerable.new [
-            AcceptableModel::Artist.new(:name => 'Busta Rhymes', :aliases => ['Busta Bus']),
-            AcceptableModel::Artist.new(:name => 'Jay-Z', :aliases => ['Jiggaman']),
-          ]
-          AcceptableModel::Artist.stub(:all).and_return artist_enum
-        end
-        it "is returning JSON" do
-          artists.for('vnd.acme.artist-v1+json')
-          busta.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
-          jayz.attributes.should eql :id => 'jay-z', :name => 'Jay-Z', :aliases => ['Jiggaman']
-        end
-
-        it "is returning XML" do
-          artists.for('vnd.acme.artist-v1+xml')
-          busta.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
-          jayz.attributes.should eql :id => 'jay-z', :name => 'Jay-Z', :aliases => ['Jiggaman']
-        end
-      end
     end
   end
 
@@ -81,16 +60,14 @@ describe AcceptableModel do
         AcceptableModel.define 'gopher'
       }.to raise_error AcceptableModel::ModelNotFound
     end
-  end
 
-  context "a dynamically defined class" do
     it "exposes the originating models accessors" do
       model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
       model.name.should eql 'Busta Rhymes'
     end
   end
 
-  context "defining associative relationships" do
+  describe "#relationship" do
     before do
       class AcceptableModel::Artist
         relationship :group
@@ -143,7 +120,7 @@ describe AcceptableModel do
     end
   end
 
-  describe "#to_json" do
+  describe "#for" do
     it "returns at HATEOS like format" do
       expected = {
         :id => 'busta-rhymes',
@@ -203,51 +180,14 @@ describe AcceptableModel do
         }
       }
 
-      let(:expected_xml) {
-'''<?xml version="1.0" encoding="UTF-8"?>
-<artist>
-  <id>busta-rhymes</id>
-  <name>Busta Rhymes</name>
-  <groups>
-    <group>
-      <id>flipmode-squad</id>
-      <name>Flipmode Squad</name>
-      <links>
-        <link>
-          <href>/groups/flipmode-squad</href>
-          <rel>/children</rel>
-        </link>
-      </links>
-    </group>
-    <group>
-      <id>leaders-of-the-new-school</id>
-      <name>Leaders of The New School</name>
-      <links>
-        <link>
-          <href>/groups/leaders-of-the-new-school</href>
-          <rel>/children</rel>
-        </link>
-      </links>
-    </group>
-  </groups>
-  <links>
-    <link>
-      <href>/artists/busta-rhymes</href>
-      <rel>/self</rel>
-    </link>
-    <link>
-      <href>/groups/flipmode-squad</href>
-      <rel>/partOf</rel>
-    </link>
-    <link>
-      <href>/groups/leaders-of-the-new-school</href>
-      <rel>/partOf</rel>
-    </link>
-  </links>
-</artist>
-'''
+      let(:expected_xml) { File.read('spec/fixtures/artist_with_groups.xml') }
+      let( :model ) { 
+        params = {
+          :name => 'Busta Rhymes',
+          :groups => ['Flipmode Squad', 'Leaders of The New School']
+        }
+        AcceptableModel::Artist.new params
       }
-      let( :model ) { AcceptableModel::Artist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School'] }
       let(:group1) { Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad' }
       let(:group2) { Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school' }
 
@@ -273,10 +213,6 @@ describe AcceptableModel do
         end
       end
 
-      it "can extend the relationship links" do
-        model.to_json.should eql relationships.to_json
-      end
-
       it "allows for the output format to be passed" do
         model.for('vnd.acme.artist-v1+json').should eql relationships.to_json
       end
@@ -290,84 +226,32 @@ describe AcceptableModel do
           model.for('vnd.acme.artist-v1+foo')
         }.to raise_error AcceptableModel::MimeTypeNotReckonised
       end
-
     end
-    describe "#all" do
-      let(:relationships) {
-        [
-          {
-            :id => 'busta-rhymes',
-            :name => 'Busta Rhymes',
-            :links => [
-              {
-                :href => '/artists/busta-rhymes',
-                :rel => '/self'
-              }
-            ]
-          },
-          {
-            :id => 'jay-z',
-            :name => 'Jay-Z',
-            :links => [
-              {
-                :href => '/artists/jay-z',
-                :rel => '/self'
-              }
-            ]
-          },
-        ]
-      }
-      before :each do
-        class AcceptableModel::Artist
-          version ['vnd.acme.artist-v1+json','vnd.acme.artist-v1+xml'] do |artist|
-            {
-              :id => artist.id,
-              :name => artist.name
-            }
-          end
-        end
+  end
 
-        artist_enum = AcceptableModel::Enumerable.new [
-          AcceptableModel::Artist.new(:name => 'Busta Rhymes', :aliases => ['Busta Bus']),
-          AcceptableModel::Artist.new(:name => 'Jay-Z', :aliases => ['Jiggaman']),
-        ]
-        AcceptableModel::Artist.stub(:all).and_return artist_enum
-      end
+  describe "#all" do
+    let(:artists) { AcceptableModel::Artist.all } 
+    let(:busta) { artists.first }
+    let(:jayz) { artists.last }
 
-      it "should be able to handle an array of objects that AcceptableModel knows about" do
-        artists = AcceptableModel::Artist.all
-        artists.for('vnd.acme.artist-v1+json').should eql relationships.to_json
-      end
+    before do
+      artist_enum = [
+        Artist.new(:name => 'Busta Rhymes', :aliases => ['Busta Bus']),
+        Artist.new(:name => 'Jay-Z', :aliases => ['Jiggaman']),
+      ]
+      Artist.stub(:all).and_return artist_enum
+    end
 
-      it "should support XML also" do
-        expected = 
-'''<?xml version="1.0" encoding="UTF-8"?>
-<artists>
-  <artist>
-    <id>busta-rhymes</id>
-    <name>Busta Rhymes</name>
-    <links>
-      <link>
-        <href>/artists/busta-rhymes</href>
-        <rel>/self</rel>
-      </link>
-    </links>
-  </artist>
-  <artist>
-    <id>jay-z</id>
-    <name>Jay-Z</name>
-    <links>
-      <link>
-        <href>/artists/jay-z</href>
-        <rel>/self</rel>
-      </link>
-    </links>
-  </artist>
-</artists>
-'''
-        artists = AcceptableModel::Artist.all
-        artists.for('vnd.acme.artist-v1+xml').should eql expected
-      end
+    it "is returning JSON" do
+      artists.for('vnd.acme.artist-v1+json')
+      busta.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+      jayz.attributes.should eql :id => 'jay-z', :name => 'Jay-Z', :aliases => ['Jiggaman']
+    end
+
+    it "is returning XML" do
+      artists.for('vnd.acme.artist-v1+xml')
+      busta.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+      jayz.attributes.should eql :id => 'jay-z', :name => 'Jay-Z', :aliases => ['Jiggaman']
     end
   end
 end

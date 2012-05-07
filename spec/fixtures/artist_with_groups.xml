@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artist>
+  <id>busta-rhymes</id>
+  <name>Busta Rhymes</name>
+  <groups>
+    <group>
+      <id>flipmode-squad</id>
+      <name>Flipmode Squad</name>
+      <links>
+        <link>
+          <href>/groups/flipmode-squad</href>
+          <rel>/children</rel>
+        </link>
+      </links>
+    </group>
+    <group>
+      <id>leaders-of-the-new-school</id>
+      <name>Leaders of The New School</name>
+      <links>
+        <link>
+          <href>/groups/leaders-of-the-new-school</href>
+          <rel>/children</rel>
+        </link>
+      </links>
+    </group>
+  </groups>
+  <links>
+    <link>
+      <href>/artists/busta-rhymes</href>
+      <rel>/self</rel>
+    </link>
+    <link>
+      <href>/groups/flipmode-squad</href>
+      <rel>/partOf</rel>
+    </link>
+    <link>
+      <href>/groups/leaders-of-the-new-school</href>
+      <rel>/partOf</rel>
+    </link>
+  </links>
+</artist>

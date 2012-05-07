@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artists>
+  <artist>
+    <id>busta-rhymes</id>
+    <name>Busta Rhymes</name>
+    <links>
+      <link>
+        <href>/artists/busta-rhymes</href>
+        <rel>/self</rel>
+      </link>
+    </links>
+  </artist>
+  <artist>
+    <id>jay-z</id>
+    <name>Jay-Z</name>
+    <links>
+      <link>
+        <href>/artists/jay-z</href>
+        <rel>/self</rel>
+      </link>
+    </links>
+  </artist>
+</artists>

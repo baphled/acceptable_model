@@ -59,6 +59,7 @@ module AcceptableModel
         #
         def all
           models = super
+          models.collect! { |m| new m.attributes }
           AcceptableModel::Enumerable.new models
         end
 
