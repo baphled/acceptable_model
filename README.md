@@ -29,32 +29,37 @@ So we have a model, that has a few associations and accessors
     end
 
 Now it'd be cool if we could build upon our object to include relationships
-between information and provide a HATEOS like API without cluttering up a
-beautiful slim models.
+between associations and provide a HATEOS like API without cluttering up a
+beautiful slim controllers.
 
-Inspired by reading Avid's '[Objects on Rails](http://devblog.avdi.org/2011/11/15/early-access-beta-of-objects-on-rails-now-available-2)' book, it'd be nice if we could
-simply delegate to our created model and have a Presenter like model that deals
-with all the presentational logic for us.
+It'd be nice if we could simply delegate to our created model and have a
+Presenter like model that deals with all the presentational logic for
+us.
 
 We want this to be with a little ceremony as possible and make sure that our
 models truely stay separate from our presentation logic.
 
 So we can define an object `AcceptableModel.define 'artist'` and then you have
-a Presenter like object that deals with the models presentation features
+a Presenter like object that deals with our output.
+
+So instead of calling a model directly we could do something like this:
 
     class Artists < Sinatra::Base
-      get '/artists'
-        AcceptableModel::Artist.all
+      get '/artists.json'
+        artists = AcceptableModel::Artist.all
+        artists.to_json
       end
     end
 
     class Groups < Sinatra::Base
-      get '/collecions'
-        AcceptableModel::Groups.all
+      get '/collecions.xml'
+        groups = AcceptableModel::Groups.all
+        groups.to_xml
       end
     end
 
-This is how we like it, our models shouldn't know about presentation logic
+Wouldn't that be cool, our models shouldn't know about presentation
+logic and our controller should be a thin as possible
 
 By default AcceptableModel::Artist will include all accessor methods that the Artist
 class exposes whilst knowing about how to deal with the models
@@ -303,6 +308,8 @@ When calling `model.all` the output will now be as following:
 
 ## TODO
 
+  * Add prefixes to relationships
+
 We should also be able to easily change the rel attributes so that we can fully
 customised the way they are displayed. It would be nice if we could do
 something like this:
@@ -310,6 +317,8 @@ something like this:
     AcceptableModel.config do |config|
       config.rel_prefix = '/relations/'
     end
+
+  * Extract presentational logic into it's own model
 
 ## Contributing
 
