@@ -14,13 +14,17 @@ class Array
     mime = self.first.mime_type_lookup mime_type
     class_name = self.first.class.to_s.downcase.pluralize
     format = "to_#{mime}".to_sym
+    attributes_for(mime_type).send format, :skip_types => true, :root => class_name
+  end
+
+  def attributes_for mime_type
     collect do |model|
       map = model.version_lookup mime_type
-      model.attributes = map[:attributes].call model
-      model.rel_links.each{|association| model.attributes.merge! association }
-      model.attributes.merge!( {:links => model.relationships} )
-      model.attributes
-    end.send format, :skip_types => true, :root => class_name
+      attributes = map[:attributes].call model
+      model.rel_links.each{|association| attributes.merge! association }
+      attributes.merge!( {:links => model.relationships} )
+      attributes
+    end
   end
 end
 

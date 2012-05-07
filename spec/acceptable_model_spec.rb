@@ -55,22 +55,57 @@ describe AcceptableModel do
   end
 
   describe "#attributes" do
-    it "stores the models attributes"
     context "should not alter the original models attributes" do
-      let(:artist) {
-        AcceptableModel::Artist.new :name => 'Busta Rhymes', :aliases => ['Busta Bus']
-      }
-      it "is returning JSON" do
-        artist.to_json
-        artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+      let(:artist) { AcceptableModel::Artist.new :name => 'Busta Rhymes', :aliases => ['Busta Bus'] }
+      let(:artists) { AcceptableModel::Artist.all } 
+      let(:busta) { artists.first }
+      let(:jayz) { artists.last }
+
+      before do
+        class AcceptableModel::Artist
+          version ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
+            {
+              :id => artist.id,
+              :name => artist.name
+            }
+          end
+        end
       end
 
-      it "is returning XML" do
-        artist.to_xml
-        artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+      context "returning single models" do
+        it "is returning JSON" do
+          artist.to_json
+          artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+        end
+
+        it "is returning XML" do
+          artist.to_xml
+          artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+        end
+      end
+
+      context "returning all" do
+        before do
+          AcceptableModel::Artist.stub(:all).and_return [
+            AcceptableModel::Artist.new(:name => 'Busta Rhymes', :aliases => ['Busta Bus']),
+            AcceptableModel::Artist.new(:name => 'Jay-Z', :aliases => ['Jiggaman']),
+          ]
+        end
+        it "is returning JSON" do
+          artists.for('vnd.acme.artist-v1+json')
+          busta.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+          jayz.attributes.should eql :id => 'jay-z', :name => 'Jay-Z', :aliases => ['Jiggaman']
+        end
+
+        it "is returning XML" do
+          artists.for('vnd.acme.artist-v1+xml')
+          busta.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+          jayz.attributes.should eql :id => 'jay-z', :name => 'Jay-Z', :aliases => ['Jiggaman']
+        end
       end
     end
   end
+
   describe "#define" do
     it "dyanmically defines a new class" do
       expect {
@@ -243,10 +278,13 @@ describe AcceptableModel do
 </artist>
 '''
       }
+      let( :model ) { AcceptableModel::Artist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School'] }
+      let(:group1) { Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad' }
+      let(:group2) { Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school' }
 
       before :each do
         class AcceptableModel::Artist
-          version ['vnd.acme.sandwich-v1+json', 'vnd.acme.sandwich-v1+xml'] do |artist|
+          version ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
             {
               :id => artist.id,
               :name => artist.name
@@ -257,6 +295,7 @@ describe AcceptableModel do
             groups.all
           end
         end
+        model.groups.stub(:all).and_return [group1, group2]
       end
 
       after do
@@ -266,33 +305,20 @@ describe AcceptableModel do
       end
 
       it "can extend the relationship links" do
-        model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School']
-        group1 = Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad'
-        group2 = Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school'
-        model.groups.stub(:all).and_return [group1, group2]
         model.to_json.should eql relationships.to_json
       end
 
       it "allows for the output format to be passed" do
-        model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School']
-        group1 = Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad'
-        group2 = Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school'
-        model.groups.stub(:all).and_return [group1, group2]
-        model.for('vnd.acme.sandwich-v1+json').should eql relationships.to_json
+        model.for('vnd.acme.artist-v1+json').should eql relationships.to_json
       end
 
       it "can deal with XML formats the same as JSON formats" do
-        model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School']
-        group1 = Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad'
-        group2 = Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school'
-        model.groups.stub(:all).and_return [group1, group2]
-        model.for('vnd.acme.sandwich-v1+xml').should eql expected_xml
+        model.for('vnd.acme.artist-v1+xml').should eql expected_xml
       end
 
       it "mime type not found" do
         expect {
-          model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
-          model.for('vnd.acme.sandwich-v1+foo')
+          model.for('vnd.acme.artist-v1+foo')
         }.to raise_error AcceptableModel::MimeTypeNotReckonised
       end
 
@@ -324,7 +350,7 @@ describe AcceptableModel do
       }
       before :each do
         class AcceptableModel::Artist
-          version ['vnd.acme.sandwich-v1+json','vnd.acme.sandwich-v1+xml'] do |artist|
+          version ['vnd.acme.artist-v1+json','vnd.acme.artist-v1+xml'] do |artist|
             {
               :id => artist.id,
               :name => artist.name
@@ -333,14 +359,14 @@ describe AcceptableModel do
         end
 
         AcceptableModel::Artist.stub(:all).and_return [
-          AcceptableModel::Artist.new(:name => 'Busta Rhymes'),
-          AcceptableModel::Artist.new(:name => 'Jay-Z'),
+          AcceptableModel::Artist.new(:name => 'Busta Rhymes', :aliases => ['Busta Bus']),
+          AcceptableModel::Artist.new(:name => 'Jay-Z', :aliases => ['Jiggaman']),
         ]
       end
 
       it "should be able to handle an array of objects that AcceptableModel knows about" do
         artists = AcceptableModel::Artist.all
-        artists.for('vnd.acme.sandwich-v1+json').should eql relationships.to_json
+        artists.for('vnd.acme.artist-v1+json').should eql relationships.to_json
       end
 
       it "should support XML also" do
@@ -370,7 +396,7 @@ describe AcceptableModel do
 </artists>
 '''
         artists = AcceptableModel::Artist.all
-        artists.for('vnd.acme.sandwich-v1+xml').should eql expected
+        artists.for('vnd.acme.artist-v1+xml').should eql expected
       end
     end
   end
