@@ -131,7 +131,7 @@ describe AcceptableModel do
             }
           end
 
-          relationship :group
+          relationship :groups
 
           def part_of
             groups.all

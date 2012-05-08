@@ -18,12 +18,12 @@ describe AcceptableModel::HATEOS do
     before do
       AcceptableModel.define 'artist'
       class AcceptableModel::Artist
-        relationship :group
+        relationship :groups
       end
     end
 
     it "lists the objects relationships" do
-      AcceptableModel::Artist.associations.should include 'group'
+      AcceptableModel::Artist.associations.should include 'groups'
     end
 
     it "should have a list of associations" do

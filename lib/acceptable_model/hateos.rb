@@ -97,7 +97,7 @@ module AcceptableModel
         associations = eval( "AcceptableModel::#{ self.class }" ).associations
         return [] if associations.nil?
         associations.collect { |association| 
-          return [] if send(association.pluralize.to_sym).nil?
+          return [] if send(association.to_sym).nil?
           build_association association
         }
       end
@@ -131,8 +131,8 @@ module AcceptableModel
 
       def build_association association
         {
-          association.pluralize.to_sym => 
-          send(association.pluralize.to_sym).collect { |model| 
+          association.to_sym => 
+          send(association.to_sym).collect { |model| 
             model.attributes.merge! build_relationship model, association
           }
         }
@@ -147,7 +147,7 @@ module AcceptableModel
         {
           :links => [
             {
-              :href => "/#{association.pluralize}/#{model.id}",
+              :href => "/#{association}/#{model.id}",
               :rel => "/children"
             }
           ]
