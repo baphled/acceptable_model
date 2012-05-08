@@ -38,12 +38,10 @@ module AcceptableModel
       # follow the below example we are easily able to differentiate between
       # differing representations of a model.
       #
-      # e.g. /*v1+json$/
+      # e.g. /*\-v1+json$/
       #
       # We are free to represent varying versions of a system without
       # complicating our models, controllers or duplicating our code base 
-      #
-      # FIXME Should move to the dynamically defined class
       #
       def for mime_type
         map  = version_lookup mime_type
@@ -55,7 +53,18 @@ module AcceptableModel
       end
 
       class << self
-        attr_accessor :associations, :version_mapper
+        #
+        # A list of associations mapped to the presenter
+        #
+        # Theses associations are linked to the delegated model and will be
+        # included in the delegate models final HATEOS structure.
+        #
+        attr_accessor :associations
+
+        #
+        # List of versions mapped to the presenter
+        #
+        attr_accessor :version_mapper
 
         #
         # Maps API version and MIME type
@@ -94,10 +103,16 @@ module AcceptableModel
         end
       end
 
+      #
+      # Set to the delegated model
+      #
       def to_model
         __getobj__
       end
 
+      #
+      # Lies and tells us that this object is actually the delegated model 
+      #
       def class
         __getobj__.class
       end
