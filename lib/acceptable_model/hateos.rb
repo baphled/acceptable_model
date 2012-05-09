@@ -101,7 +101,14 @@ module AcceptableModel
           build_association association
         }
       end
-
+       
+      #
+      # Gather a list of relationships created by the user
+      #
+      def extended_relationships
+        HATEOS.relationship_types.select { |type| extended_relationship? type }
+      end
+       
       #
       # Override the models to_json method so that we can can display our
       # HATEOS formatted data
@@ -152,13 +159,6 @@ module AcceptableModel
             }
           ]
         }
-      end
-
-      #
-      # Gather a list of relationships created by the user
-      #
-      def extended_relationships
-        HATEOS.relationship_types.select { |type| extended_relationship? type }
       end
 
       #
