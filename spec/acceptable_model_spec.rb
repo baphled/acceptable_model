@@ -21,12 +21,12 @@ describe AcceptableModel do
       end
 
       it "#to_json is called" do
-        artist.to_json
+        artist.for('vnd.acme.artist-v1+json')
         artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
       end
 
       it "#to_xml is called" do
-        artist.to_xml
+        artist.for('vnd.acme.artist-v1+xml')
         artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
       end
     end
@@ -64,7 +64,7 @@ describe AcceptableModel do
         ]
       }.to_json
       model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
-      model.to_json.should eql expected
+      model.for('vnd.acme.artist-v1+json').should eql expected
     end
 
     context "extended relationships" do

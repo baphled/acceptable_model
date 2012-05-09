@@ -41,10 +41,8 @@ describe AcceptableModel::RelationshipsMapper do
     artist.groups.stub(:all).and_return [group1, group2]
   end
 
-  after :each do
-    class AcceptableModel::Artist
-      undef part_of
-    end
+  after do
+    AcceptableModel.send :remove_const, :Artist
   end
 
   it "takes a model" do

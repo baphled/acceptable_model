@@ -20,8 +20,13 @@ module AcceptableModel
     def attributes_for mime_type
       collect do |model|
         map = model.version_lookup mime_type
-        model_attributes model, map[:attributes].call(model)
+        representation model, map[:attributes]
       end
+    end
+
+    def representation model, attributes_block
+      mapper = RelationshipsMapper.new :model => model, :response_block => model.response_block, :attributes_block => attributes_block, :associations => model.associations
+      mapper.representation
     end
 
     def model_attributes model, attributes

@@ -18,8 +18,19 @@ describe AcceptableModel::HATEOS do
     before do
       AcceptableModel.define 'artist'
       class AcceptableModel::Artist
+        version ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
+          {
+            :id => artist.id,
+            :name => artist.name
+          }
+        end
+
         relationship :groups
       end
+    end
+
+    after do
+      AcceptableModel.send :remove_const, :Artist
     end
 
     it "lists the objects relationships" do
@@ -64,7 +75,7 @@ describe AcceptableModel::HATEOS do
         ]
       }.to_json
       model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School']
-      model.to_json.should eql expected
+      model.for('vnd.acme.artist-v1+json').should eql expected
     end
   end
 end

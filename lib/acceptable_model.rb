@@ -25,6 +25,7 @@ module AcceptableModel
     """
     class #{model_object} < SimpleDelegator
       include HATEOS
+      attr_accessor :attributes_block
 
       def initialize params
         @delegate_model = ::#{model_object}.new params
@@ -47,9 +48,14 @@ module AcceptableModel
         map  = version_lookup mime_type
         raise MimeTypeNotReckonised.new mime_type if map.nil?
         mime = mime_type_lookup mime_type
-        attributes = map[:attributes].call self
         format = 'to_' + mime
-        send format.to_sym
+        representation(map[:attributes]).send format.to_sym, :skip_types => true, :root => self.class.to_s.downcase
+      end
+
+      def representation attributes_block
+        klass =  'AcceptableModel::#{model_object}'.constantize
+        mapper = RelationshipsMapper.new :model => self, :response_block => self.response_block, :attributes_block => attributes_block, :associations => klass.associations
+        mapper.representation
       end
 
       class << self

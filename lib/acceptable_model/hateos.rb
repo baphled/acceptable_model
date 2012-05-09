@@ -93,103 +93,29 @@ module AcceptableModel
         relationships.unshift( base_relationship ).flatten!
       end
 
-      def relationship_links
-        associations = eval( "AcceptableModel::#{ self.class }" ).associations
-        return [] if associations.nil?
-        associations.collect { |association| 
-          return [] if send(association.to_sym).nil?
-          build_association association
-        }
+      def response_block
+        Proc.new do |model, relationship|
+          {
+            :href => "/#{model.class.to_s.downcase.pluralize}/#{model.id}",
+            :rel => "/#{relationship.camelize :lower}"
+          }
+        end
       end
-       
+
       #
       # Gather a list of relationships created by the user
       #
       def extended_relationships
         HATEOS.relationship_types.select { |type| extended_relationship? type }
       end
-       
-      #
-      # Override the models to_json method so that we can can display our
-      # HATEOS formatted data
-      #
-      def to_json options = {}
-        opts = collect_attributes options
-        attributes.merge(opts).to_json
-      end
-
-      #
-      # Build our XML response using builder
-      #
-      # FIXME:Should flag those attributes that should be wrapped in CDATA tags 
-      # FIXME links should be in the HTML link format ('<link href="http://google.com" rel="parent" />') 
-      #
-      def to_xml options = {}
-        opts = collect_attributes options
-        attributes.merge(opts).to_xml :skip_types => true, :root => self.class.to_s.downcase
-      end
 
       protected
-
-      def collect_attributes options
-        relationship_links.each{|association| attributes.merge! association }
-        {:links => relationships}.merge options
-      end
-
-      def build_association association
-        {
-          association.to_sym => 
-          send(association.to_sym).collect { |model| 
-            model.attributes.merge! build_relationship model, association
-          }
-        }
-      end
-
-      #
-      # Dynamically builds associative relationships
-      #
-      # FIXME: Should be able to define link relationships
-      #
-      def build_relationship model, association
-        {
-          :links => [
-            {
-              :href => "/#{association}/#{model.id}",
-              :rel => "/children"
-            }
-          ]
-        }
-      end
-
+			 
       #
       # Check that the object has the relationship defined
       #
       def extended_relationship? relationship
         self.public_methods(false).include? relationship.to_sym
-      end
-
-      #
-      # Maps the relationship to the format we expect
-      #
-      def relationship_mapper relationship
-        send(relationship.to_sym).collect { |part| 
-          {
-            :href => "/#{part.class.to_s.downcase.pluralize}/#{part.id}",
-            :rel => "/#{relationship.camelize :lower}"
-          }
-        }
-      end
-
-      #
-      # Our response object always has a reference to itself
-      #
-      def base_relationship
-        [
-          {
-            :href => "/#{self.class.to_s.downcase.pluralize}/#{id}",
-            :rel => '/self'
-          }
-        ]
       end
     end
 
