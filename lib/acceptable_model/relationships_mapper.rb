@@ -24,6 +24,8 @@ module AcceptableModel
       representation.merge! :links => links
     end
 
+    protected
+
     #
     # Calls the attributes_block and passes the model to base on the response on
     #
@@ -49,8 +51,6 @@ module AcceptableModel
     #
     # Returns a list of all the models relationships
     #
-    # FIXME Not quite sure how to deal with links that are not children
-    #
     def relationships
       return [] if associations.nil?
       associations.collect { |related_model|
@@ -58,6 +58,9 @@ module AcceptableModel
       }
     end
 
+    #
+    # FIXME Not quite sure how to deal with links that are not children
+    #
     def model_attributes model, related_model
       return [] if model.send(related_model.to_sym).nil?
       model.send(related_model.to_sym).collect { |associated_model| 

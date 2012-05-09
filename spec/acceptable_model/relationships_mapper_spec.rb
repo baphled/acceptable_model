@@ -20,7 +20,15 @@ describe AcceptableModel::RelationshipsMapper do
   }
   let(:associations) { AcceptableModel::Artist.associations }
   let(:attributes) { artist.version_lookup( 'vnd.acme.artist-v1+json')[:attributes] }
-  let( :mapper ) { AcceptableModel::RelationshipsMapper.new :model => artist, :response_block => structure, :attributes_block => attributes, :associations => associations }
+  let( :mapper ) { 
+    mapper_params = {
+      :model => artist,
+      :response_block => structure,
+      :attributes_block => attributes,
+      :associations => associations
+    }
+    AcceptableModel::RelationshipsMapper.new mapper_params
+  }
 
   before :each do
     AcceptableModel.define 'artist'
@@ -55,10 +63,6 @@ describe AcceptableModel::RelationshipsMapper do
     mapper.model.should_not be_nil
   end
 
-  it "knows what attributes should be returned" do
-    mapper.attributes.should_not include :groups=>["Flipmode Squad", "Leaders of The New School"]
-  end
-
   describe "#response_block" do
     it "takes a structure block" do
       expected =
@@ -67,56 +71,6 @@ describe AcceptableModel::RelationshipsMapper do
         :rel => '/children'
       }
       mapper.response_block.call( stub(:class => Artist, :id => '123'), 'children' ).should eql expected
-    end
-  end
-
-  describe "#associations" do
-    it "can take the a list of model associations" do
-      mapper.associations.should be_an Array
-    end
-  end
-
-  describe "#links" do
-    it "creates the hash for the links" do
-      links = [
-        {:href=>"/artists/busta-rhymes", :rel=>"/self"},
-        {:href=>"/groups/flipmode-squad", :rel=>"/partOf"},
-        {:href=>"/groups/leaders-of-the-new-school", :rel=>"/partOf"}
-      ]
-      mapper.links.should eql links
-    end
-
-  end
-
-  describe "#relationships" do
-    it "creates the hash for the associations" do
-      expected = [
-        {
-          :groups => [
-            {
-              :id => 'flipmode-squad',
-              :name => 'Flipmode Squad',
-              :links => [
-                {
-                  :href => '/groups/flipmode-squad',
-                  :rel => '/children'
-                }
-              ]
-            },
-            {
-              :id => 'leaders-of-the-new-school',
-              :name => 'Leaders of The New School',
-              :links => [
-                {
-                  :href => '/groups/leaders-of-the-new-school',
-                  :rel => '/children'
-                }
-              ]
-            }
-          ]
-        }
-      ]
-      mapper.relationships.should eql expected
     end
   end
 
@@ -167,7 +121,7 @@ describe AcceptableModel::RelationshipsMapper do
     end
 
     it "should not include attributes we don't care about" do
-      mapper.attributes.should_not include :groups => ["Flipmode Squad", "Leaders of The New School"]
+      mapper.representation.should_not include :groups => ["Flipmode Squad", "Leaders of The New School"]
     end
   end
 end
