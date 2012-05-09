@@ -39,12 +39,8 @@ module AcceptableModel
     # These include a link to the actual model along with its relationships
     #
     def links
-      children = model.extended_relationships.collect { |association|
-        model.send(association.to_sym).collect { |rel_model|
-          response_block.call rel_model, association
-        }
-      }.flatten!
-      children = [] if children.nil?
+      relationships = map_relationships
+      children = ( relationships.nil? )? [] : relationships
       children.unshift( response_block.call( model, 'self') )
     end
 
@@ -53,29 +49,47 @@ module AcceptableModel
     #
     def relationships
       return [] if associations.nil?
-      associations.collect { |related_model|
-        { related_model.to_sym => model_attributes( model, related_model ) }
+      associations.collect { |related_association|
+        { related_association.to_sym => model_attributes( model, related_association ) }
       }
     end
 
-    #
-    # FIXME Not quite sure how to deal with links that are not children
-    #
-    def model_attributes model, related_model
-      return [] if model.send(related_model.to_sym).nil?
-      construct_association_hash model.send(related_model.to_sym)
+    def model_attributes model, related_association
+      return [] if model.send(related_association.to_sym).nil?
+      construct_relationship_hash model.send(related_association.to_sym)
     end
 
     protected
 
-    def construct_association_hash method
-      if method.class != Array
-        method.attributes.merge! :links => [ response_block.call(method, 'children') ] 
+    #
+    # Constructs a hash containing all of the models related models and thier
+    # corresponding links
+    #
+    def construct_relationship_hash association
+      if association.class != Array
+        association.attributes.merge! build_links association, 'children'
       else
-        method.collect { |associated_model| 
-          associated_model.attributes.merge! :links => [ response_block.call(associated_model, 'children') ]
+        association.collect { |associated_model| 
+          associated_model.attributes.merge! build_links associated_model, 'children'
         }
       end
+    end
+
+    #
+    # build the given models HATEOS like links
+    #
+    # FIXME Not quite sure how to deal with links that are not children
+    #
+    def build_links model, relationship
+      { :links => [ response_block.call(model, relationship) ] }
+    end
+
+    def map_relationships
+      model.extended_relationships.collect { |association|
+        model.send(association.to_sym).collect { |rel_model|
+          response_block.call rel_model, association
+        }
+      }.flatten
     end
   end
 end
