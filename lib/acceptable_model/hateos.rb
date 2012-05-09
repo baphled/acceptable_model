@@ -85,7 +85,7 @@ module AcceptableModel
       end
 
       #
-      # A list of the model relationships
+			# A list of the model associations to include in the response
       #
       def relationships
         relationships = extended_relationships.collect! { |relationship| relationship_mapper relationship }
@@ -93,6 +93,12 @@ module AcceptableModel
         relationships.unshift( base_relationship ).flatten!
       end
 
+			#
+			# Used to pass around the links structure we use to generate links
+			# hashes.
+			#
+			# These are used to represent the list of links associated to the model
+			#
       def response_block
         Proc.new do |model, relationship|
           {
@@ -109,8 +115,6 @@ module AcceptableModel
         HATEOS.relationship_types.select { |type| extended_relationship? type }
       end
 
-      protected
-			 
       #
       # Check that the object has the relationship defined
       #
