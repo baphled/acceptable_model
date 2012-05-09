@@ -33,7 +33,7 @@ describe AcceptableModel do
   end
 
   describe "#define" do
-    it "dyanmically defines a new class" do
+    it "dynamically defines a new class" do
       expect {
         AcceptableModel::Artist.new :name => 'Busta Rhymes'
       }.to_not raise_error Exception
