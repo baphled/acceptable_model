@@ -123,5 +123,29 @@ describe AcceptableModel::RelationshipsMapper do
     it "should not include attributes we don't care about" do
       mapper.representation.should_not include :groups => ["Flipmode Squad", "Leaders of The New School"]
     end
+
+    it "can represent a one to one relationship" do
+      class Alias
+        attr_accessor :id, :name
+        attr_accessor :attributes
+
+        def initialize params = {}
+          self.name = params[:name]
+          self.id = self.name.downcase.gsub(' ', '-')
+          self.attributes = { :id => self.id }
+          self.attributes.merge! params
+        end
+      end
+
+      class AcceptableModel::Artist
+        relationship :alias
+        def alias
+          Alias.new :name => 'Busta Bus'
+        end
+      end
+      expected = { :alias => {:id=>"busta-bus", :name=>"Busta Bus", :links=>[{:href=>"/aliases/busta-bus", :rel=>"/children"}]} }
+      AcceptableModel::RelationshipsMapper.new :model => artist, :response_block => structure, :attributes_block => attributes, :associations => associations
+      mapper.representation.should include expected
+    end
   end
 end

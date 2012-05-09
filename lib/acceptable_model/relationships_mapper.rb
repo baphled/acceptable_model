@@ -63,9 +63,19 @@ module AcceptableModel
     #
     def model_attributes model, related_model
       return [] if model.send(related_model.to_sym).nil?
-      model.send(related_model.to_sym).collect { |associated_model| 
-        associated_model.attributes.merge! :links => [ response_block.call(associated_model, 'children') ]
-      }
+      construct_association_hash model.send(related_model.to_sym)
+    end
+
+    protected
+
+    def construct_association_hash method
+      if method.class != Array
+        method.attributes.merge! :links => [ response_block.call(method, 'children') ] 
+      else
+        method.collect { |associated_model| 
+          associated_model.attributes.merge! :links => [ response_block.call(associated_model, 'children') ]
+        }
+      end
     end
   end
 end
