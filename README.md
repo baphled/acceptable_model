@@ -305,6 +305,7 @@ something like this:
 
   * Should be able to specify relationships types when using the relationships macro
   * Should be able to specify attributes that should be wrapped in CDATA
+  * It should accept basic mime types
 
 ## Contributing
 
