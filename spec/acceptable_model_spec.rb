@@ -1,25 +1,23 @@
 require "spec_helper"
 
 describe AcceptableModel do
+  let(:artist) { AcceptableModel::Artist.new :name => 'Busta Rhymes', :aliases => ['Busta Bus'] }
+  let(:artists) { AcceptableModel::Artist.all } 
+  let(:busta) { artists.first }
+  let(:jayz) { artists.last }
+
   before :each do
     AcceptableModel.define 'artist'
+
+    class AcceptableModel::Artist
+      version ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
+        { :id => artist.id, :name => artist.name }
+      end
+    end
   end
-  
+
   describe "#attributes" do
     context "should not alter the original models attributes" do
-      let(:artist) { AcceptableModel::Artist.new :name => 'Busta Rhymes', :aliases => ['Busta Bus'] }
-      let(:artists) { AcceptableModel::Artist.all } 
-      let(:busta) { artists.first }
-      let(:jayz) { artists.last }
-
-      before do
-        class AcceptableModel::Artist
-          version ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
-            { :id => artist.id, :name => artist.name }
-          end
-        end
-      end
-
       it "#to_json is called" do
         artist.for('vnd.acme.artist-v1+json')
         artist.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
@@ -48,6 +46,32 @@ describe AcceptableModel do
     it "exposes the originating models accessors" do
       model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
       model.name.should eql 'Busta Rhymes'
+    end
+  end
+
+  describe "#all" do
+    let(:artists) { AcceptableModel::Artist.all } 
+    let(:busta) { artists.first }
+    let(:jayz) { artists.last }
+
+    before do
+      artist_enum = [
+        Artist.new(:name => 'Busta Rhymes', :aliases => ['Busta Bus']),
+        Artist.new(:name => 'Jay-Z', :aliases => ['Jiggaman']),
+      ]
+      Artist.stub(:all).and_return artist_enum
+    end
+
+    it "is returning JSON" do
+      artists.for('vnd.acme.artist-v1+json')
+      busta.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+      jayz.attributes.should eql :id => 'jay-z', :name => 'Jay-Z', :aliases => ['Jiggaman']
+    end
+
+    it "is returning XML" do
+      artists.for('vnd.acme.artist-v1+xml')
+      busta.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
+      jayz.attributes.should eql :id => 'jay-z', :name => 'Jay-Z', :aliases => ['Jiggaman']
     end
   end
 
@@ -144,9 +168,7 @@ describe AcceptableModel do
       end
 
       after :each do
-        class AcceptableModel::Artist
-          undef part_of
-        end
+        AcceptableModel.send :remove_const, :Artist
       end
 
       it "allows for the output format to be passed" do
@@ -165,29 +187,40 @@ describe AcceptableModel do
     end
   end
 
-  describe "#all" do
-    let(:artists) { AcceptableModel::Artist.all } 
-    let(:busta) { artists.first }
-    let(:jayz) { artists.last }
+  describe "#mime_type_lookup" do
+    context "can work out basic mime types" do
+      before do
+        class AcceptableModel::Artist
+          version ['json', 'xml', 'javascript'] do |artist|
+            { :id => artist.id, :name => artist.name }
+          end
+        end
+      end
 
-    before do
-      artist_enum = [
-        Artist.new(:name => 'Busta Rhymes', :aliases => ['Busta Bus']),
-        Artist.new(:name => 'Jay-Z', :aliases => ['Jiggaman']),
-      ]
-      Artist.stub(:all).and_return artist_enum
-    end
+      it "can handle json" do
+        expected = { :artist => {
+            :id => 'busta-rhymes',
+            :name => 'Busta Rhymes',
+            :links => [
+              {
+                :href => '/artists/busta-rhymes',
+                :rel => '/self'
+              }
+            ]
+          }
+        }
+        model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
+        model.for('json').should eql expected.to_json
+      end
 
-    it "is returning JSON" do
-      artists.for('vnd.acme.artist-v1+json')
-      busta.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
-      jayz.attributes.should eql :id => 'jay-z', :name => 'Jay-Z', :aliases => ['Jiggaman']
-    end
+      it "can handle xml" do
+        expected = File.open('spec/fixtures/artist.xml').read
+        model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
+        model.for('xml').should eql expected
+      end
 
-    it "is returning XML" do
-      artists.for('vnd.acme.artist-v1+xml')
-      busta.attributes.should eql :id => 'busta-rhymes', :name => 'Busta Rhymes', :aliases => ['Busta Bus']
-      jayz.attributes.should eql :id => 'jay-z', :name => 'Jay-Z', :aliases => ['Jiggaman']
+      it "can handle jsonp"
     end
   end
+
 end

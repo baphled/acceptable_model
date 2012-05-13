@@ -67,24 +67,6 @@ module AcceptableModel
       private :relationships=
 
       #
-      # Looks up the format that the response should be returned as
-      #
-      def mime_type_lookup mime_type
-        respond_with = version_lookup mime_type
-        mime_type.split('+').last unless respond_with.nil?
-      end
-
-      #
-      # Looks up the representational version that should be returned
-      #
-      # This allows the interface user to have differing versions of the same model
-      #
-      def version_lookup mime_type
-        mappers = eval( "AcceptableModel::#{ self.class }" ).version_mapper
-        mappers.detect { |mapper| mime_type == mapper[:version] }
-      end
-
-      #
       # A list of the model associations to include in the response
       #
       def relationships

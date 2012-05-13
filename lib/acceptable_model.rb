@@ -58,6 +58,25 @@ module AcceptableModel
         Representation.new self.class.to_s.downcase => mapper.representation
       end
 
+      #
+      # Looks up the format that the response should be returned as
+      #
+      def mime_type_lookup mime_type
+        respond_with = version_lookup mime_type
+        mime_type.split('+').last unless respond_with.nil?
+      end
+
+      #
+      # Looks up the representational version that should be returned
+      #
+      # This allows the interface user to have differing versions of the same model
+      #
+      def version_lookup mime_type
+        klass = 'AcceptableModel::#{model_object}'.constantize
+        mappers = klass.version_mapper
+        mappers.detect { |mapper| mime_type == mapper[:version] }
+      end
+
       class << self
         #
         # A list of associations mapped to the presenter

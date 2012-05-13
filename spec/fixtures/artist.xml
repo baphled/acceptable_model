@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artist>
+  <id>busta-rhymes</id>
+  <name>Busta Rhymes</name>
+  <links>
+    <link href="/artists/busta-rhymes" rel="/self"/>
+  </links>
+</artist>
