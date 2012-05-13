@@ -155,36 +155,21 @@ or calling `artist.for('vnd.acme.artist-v1+xml')` would yield:
           <id>flipmode-squad</id>
           <name>Flipmode Squad</name>
           <links>
-            <link>
-              <href>/groups/flipmode-squad</href>
-              <rel>/children</rel>
-            </link>
+            <link href="/groups/flipmode-squad" rel="/children">
           </links>
         </group>
         <group>
           <id>leaders-of-the-new-school</id>
           <name>Leaders of The New School</name>
           <links>
-            <link>
-              <href>/groups/leaders-of-the-new-school</href>
-              <rel>/children</rel>
-            </link>
+            <link href="/groups/leaders-of-the-new-school" rel="/children">
           </links>
         </group>
       </groups>
       <links>
-        <link>
-          <href>/artists/busta-rhymes</href>
-          <rel>/self</rel>
-        </link>
-        <link>
-          <href>/groups/flipmode-squad</href>
-          <rel>/partOf</rel>
-        </link>
-        <link>
-          <href>/groups/leaders-of-the-new-school</href>
-          <rel>/partOf</rel>
-        </link>
+        <link href="/artists/busta-rhymes" rel="/self">
+        <link href="/groups/flipmode-squad" rel="/partOf">
+        <link href="/groups/leaders-of-the-new-school" rel="/partOf">
       </links>
     </artist>
 
@@ -319,7 +304,7 @@ something like this:
     end
 
   * Should be able to specify relationships types when using the relationships macro
-  * hrefs and rels values should be attributes of the link element
+  * Should be able to specify attributes that should be wrapped in CDATA
 
 ## Contributing
 
