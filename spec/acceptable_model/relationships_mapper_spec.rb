@@ -77,7 +77,7 @@ describe AcceptableModel::RelationshipsMapper do
   describe "#representation" do
     it "includes the models attributes" do
       expected = {:id=>"busta-rhymes", :name=>"Busta Rhymes"}
-      mapper.representation.should include expected
+      mapper.representation.to_hash.should include expected
     end
 
     it "includes the models associations" do
@@ -88,7 +88,7 @@ describe AcceptableModel::RelationshipsMapper do
           {:href=>"/groups/leaders-of-the-new-school", :rel=>"/partOf"}
         ]
       }
-      mapper.representation.should include links
+      mapper.representation.to_hash.should include links
     end
 
     it "includes the models relationships" do
@@ -117,11 +117,11 @@ describe AcceptableModel::RelationshipsMapper do
           ]
         }
 
-      mapper.representation.should include expected
+      mapper.representation.to_hash.should include expected
     end
 
     it "should not include attributes we don't care about" do
-      mapper.representation.should_not include :groups => ["Flipmode Squad", "Leaders of The New School"]
+      mapper.representation.to_hash.should_not include :groups => ["Flipmode Squad", "Leaders of The New School"]
     end
 
     it "can represent a one to one relationship" do
@@ -145,7 +145,7 @@ describe AcceptableModel::RelationshipsMapper do
       end
       expected = { :alias => {:id=>"busta-bus", :name=>"Busta Bus", :links=>[{:href=>"/aliases/busta-bus", :rel=>"/children"}]} }
       AcceptableModel::RelationshipsMapper.new :model => artist, :response_block => structure, :attributes_block => attributes, :associations => associations
-      mapper.representation.should include expected
+      mapper.representation.to_hash.should include expected
     end
   end
 end

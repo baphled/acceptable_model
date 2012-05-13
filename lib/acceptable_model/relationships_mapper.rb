@@ -27,10 +27,10 @@ module AcceptableModel
     protected
 
     #
-    # Calls the attributes_block and passes the model to base on the response on
+    # Gathers the models attributes
     #
     def attributes
-      attributes = attributes_block.call model
+      attributes_block.call model
     end
 
     #

@@ -15,6 +15,10 @@ describe AcceptableModel::HATEOS do
   end
 
   describe "#relationship" do
+    let(:model) { AcceptableModel::Artist.new :name => 'Busta Rhymes', :aliases => ['Busta Bus'], :groups => ['Flipmode Squad', 'Leaders of The New School'] }
+    let(:group1) { Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad' }
+    let(:group2) { Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school' }
+
     before do
       AcceptableModel.define 'artist'
       class AcceptableModel::Artist
@@ -26,7 +30,11 @@ describe AcceptableModel::HATEOS do
         end
 
         relationship :groups
+        def part_of
+          groups.all
+        end
       end
+      model.groups.stub(:all).and_return [group1, group2]
     end
 
     after do
@@ -42,40 +50,55 @@ describe AcceptableModel::HATEOS do
     end
 
     it "should allow use to define a relationship" do
-      expected = {
-        'id' => 'busta-rhymes',
-        'name' => 'Busta Rhymes',
-        'groups' => [
+      expected = 
+        { 'artist' =>
           {
-            'id' => 'flipmode-squad',
-            'name' => 'Flipmode Squad',
-            'links' => [
+            'id' => 'busta-rhymes',
+            'name' => 'Busta Rhymes',
+            'groups' => [
               {
-               'href' => '/groups/flipmode-squad',
-               'rel' => '/children'
+                'id' => 'flipmode-squad',
+                'name' => 'Flipmode Squad',
+                'links' => [
+                  {
+                   'href' => '/groups/flipmode-squad',
+                   'rel' => '/children'
+                  }
+                ]
+              },
+              {
+                'id' => 'leaders-of-the-new-school',
+                'name' => 'Leaders of The New School',
+                'links' => [
+                  {
+                   'href' => '/groups/leaders-of-the-new-school',
+                   'rel' => '/children'
+                  }
+                ]
               }
-            ]
-          },
-          {
-            'id' => 'leaders-of-the-new-school',
-            'name' => 'Leaders of The New School',
+            ],
             'links' => [
               {
-               'href' => '/groups/leaders-of-the-new-school',
-               'rel' => '/children'
+                'href' => '/artists/busta-rhymes',
+                'rel' => '/self'
+              },
+              {
+                'href' => '/groups/flipmode-squad',
+                'rel' => '/partOf'
+              },
+              {
+                'href' => '/groups/leaders-of-the-new-school',
+                'rel' => '/partOf'
               }
             ]
           }
-        ],
-        'links' => [
-          {
-            'href' => '/artists/busta-rhymes',
-            'rel' => '/self'
-          }
-        ]
-      }.to_json
-      model = AcceptableModel::Artist.new :name => 'Busta Rhymes', :groups => ['Flipmode Squad', 'Leaders of The New School']
-      model.for('vnd.acme.artist-v1+json').should eql expected
+        }
+      model.for('vnd.acme.artist-v1+json').should eql expected.to_json
+    end
+
+    it "outputs links with the href and rel as an attribute" do
+      expected = File.open('spec/fixtures/artist_with_groups.xml').read
+      model.for('vnd.acme.artist-v1+xml').should eql expected
     end
   end
 end

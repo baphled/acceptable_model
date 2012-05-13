@@ -49,13 +49,13 @@ module AcceptableModel
         raise MimeTypeNotReckonised.new mime_type if map.nil?
         mime = mime_type_lookup mime_type
         format = 'to_' + mime
-        representation(map[:attributes]).send format.to_sym, :skip_types => true, :root => self.class.to_s.downcase
+        representation(map[:attributes]).send format.to_sym
       end
 
       def representation attributes_block
         klass =  'AcceptableModel::#{model_object}'.constantize
         mapper = RelationshipsMapper.new :model => self, :response_block => self.response_block, :attributes_block => attributes_block, :associations => klass.associations
-        mapper.representation
+        Representation.new self.class.to_s.downcase => mapper.representation
       end
 
       class << self

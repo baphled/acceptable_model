@@ -4,20 +4,14 @@
     <id>busta-rhymes</id>
     <name>Busta Rhymes</name>
     <links>
-      <link>
-        <href>/artists/busta-rhymes</href>
-        <rel>/self</rel>
-      </link>
+      <link href="/artists/busta-rhymes" rel="/self"/>
     </links>
   </artist>
   <artist>
     <id>jay-z</id>
     <name>Jay-Z</name>
     <links>
-      <link>
-        <href>/artists/jay-z</href>
-        <rel>/self</rel>
-      </link>
+      <link href="/artists/jay-z" rel="/self"/>
     </links>
   </artist>
 </artists>

@@ -53,61 +53,64 @@ describe AcceptableModel do
 
   describe "#for" do
     it "returns at HATEOS like format" do
-      expected = {
-        :id => 'busta-rhymes',
-        :name => 'Busta Rhymes',
-        :links => [
-          {
-            :href => '/artists/busta-rhymes',
-            :rel => '/self'
-          }
-        ]
-      }.to_json
-      model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
-      model.for('vnd.acme.artist-v1+json').should eql expected
-    end
-
-    context "extended relationships" do
-      let(:relationships) {
-        {
+      expected = { :artist => {
           :id => 'busta-rhymes',
           :name => 'Busta Rhymes',
-          :groups => [
-            {
-              'id' => 'flipmode-squad',
-              'name' => 'Flipmode Squad',
-              'links' => [
-                {
-                 'href' => '/groups/flipmode-squad',
-                 'rel' => '/children'
-                }
-              ]
-            },
-            {
-              'id' => 'leaders-of-the-new-school',
-              'name' => 'Leaders of The New School',
-              'links' => [
-                {
-                 'href' => '/groups/leaders-of-the-new-school',
-                 'rel' => '/children'
-                }
-              ]
-            }
-          ],
           :links => [
             {
               :href => '/artists/busta-rhymes',
               :rel => '/self'
-            },
-            {
-              :href => '/groups/flipmode-squad',
-              :rel => '/partOf'
-            },
-            {
-              :href => '/groups/leaders-of-the-new-school',
-              :rel => '/partOf'
             }
           ]
+        }
+      }
+      model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
+      model.for('vnd.acme.artist-v1+json').should eql expected.to_json
+    end
+
+    context "extended relationships" do
+      let(:relationships) {
+        { :artist =>
+          {
+            :id => 'busta-rhymes',
+            :name => 'Busta Rhymes',
+            :groups => [
+              {
+                'id' => 'flipmode-squad',
+                'name' => 'Flipmode Squad',
+                'links' => [
+                  {
+                   'href' => '/groups/flipmode-squad',
+                   'rel' => '/children'
+                  }
+                ]
+              },
+              {
+                'id' => 'leaders-of-the-new-school',
+                'name' => 'Leaders of The New School',
+                'links' => [
+                  {
+                   'href' => '/groups/leaders-of-the-new-school',
+                   'rel' => '/children'
+                  }
+                ]
+              }
+            ],
+            :links => [
+              {
+                :href => '/artists/busta-rhymes',
+                :rel => '/self'
+              },
+              {
+                :href => '/groups/flipmode-squad',
+                :rel => '/partOf'
+              },
+              {
+                :href => '/groups/leaders-of-the-new-school',
+                :rel => '/partOf'
+              }
+            ]
+          }
         }
       }
 

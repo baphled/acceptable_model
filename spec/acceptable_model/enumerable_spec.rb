@@ -16,28 +16,29 @@ describe "AcceptableModel::Enumerable" do
 
   describe "#for" do
     let(:relationships) {
-      [
-        {
-          :id => 'busta-rhymes',
-          :name => 'Busta Rhymes',
-          :links => [
-            {
-              :href => '/artists/busta-rhymes',
-              :rel => '/self'
-            }
-          ]
-        },
-        {
-          :id => 'jay-z',
-          :name => 'Jay-Z',
-          :links => [
-            {
-              :href => '/artists/jay-z',
-              :rel => '/self'
-            }
-          ]
-        },
-      ]
+      { :artists => [
+          {
+            :id => 'busta-rhymes',
+            :name => 'Busta Rhymes',
+            :links => [
+              {
+                :href => '/artists/busta-rhymes',
+                :rel => '/self'
+              }
+            ]
+          },
+          {
+            :id => 'jay-z',
+            :name => 'Jay-Z',
+            :links => [
+              {
+                :href => '/artists/jay-z',
+                :rel => '/self'
+              }
+            ]
+          },
+        ]
+      }
     }
 
     before :each do
