@@ -52,7 +52,7 @@ describe AcceptableModel do
   end
 
   describe "#for" do
-    it "returns at HATEOS like format" do
+    it "returns at HATEOAS like format" do
       expected = { :artist => {
           :id => 'busta-rhymes',
           :name => 'Busta Rhymes',

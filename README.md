@@ -29,7 +29,7 @@ So we have a model, that has a few associations and accessors
     end
 
 Now it'd be cool if we could build upon our object to include relationships
-between associations and provide a HATEOS like API without cluttering up a
+between associations and provide a HATEOAS like API without cluttering up a
 beautiful slim controllers.
 
 It'd be nice if we could simply delegate to our created model and have a
@@ -63,7 +63,7 @@ logic and our controller should be a thin as possible
 
 By default AcceptableModel::Artist will include all accessor methods that the Artist
 class exposes whilst knowing about how to deal with the models
-relationships and representing this in a HATEOS format.
+relationships and representing this in a HATEOAS format.
 
 ### Separating presentation with versioning
 
@@ -99,7 +99,7 @@ expected responses dependant on the version provided.
     end
 
 AcceptableModel doesn't try to deal with HTTP requests, it merely
-creates a wrapper object that replicates the HATEOS response format, so
+creates a wrapper object that replicates the HATEOAS response format, so
 calling `artist.for('vnd.acme.artist-v1+json')` returns the following response:
 
     {

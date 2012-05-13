@@ -5,9 +5,9 @@ require "acceptable_model/exceptions"
 
 module AcceptableModel
   #
-  # HATEOS based representation for models
+  # HATEOAS based representation for models
   #
-  module HATEOS
+  module HATEOAS
     class << self
       #
       # Configuration variables
@@ -85,7 +85,7 @@ module AcceptableModel
       end
 
       #
-			# A list of the model associations to include in the response
+      # A list of the model associations to include in the response
       #
       def relationships
         relationships = extended_relationships.collect! { |relationship| relationship_mapper relationship }
@@ -93,12 +93,12 @@ module AcceptableModel
         relationships.unshift( base_relationship ).flatten!
       end
 
-			#
-			# Used to pass around the links structure we use to generate links
-			# hashes.
-			#
-			# These are used to represent the list of links associated to the model
-			#
+      #
+      # Used to pass around the links structure we use to generate links
+      # hashes.
+      #
+      # These are used to represent the list of links associated to the model
+      #
       def response_block
         Proc.new do |model, relationship|
           {
@@ -112,7 +112,7 @@ module AcceptableModel
       # Gather a list of relationships created by the user
       #
       def extended_relationships
-        HATEOS.relationship_types.select { |type| extended_relationship? type }
+        HATEOAS.relationship_types.select { |type| extended_relationship? type }
       end
 
       #

@@ -1,6 +1,6 @@
 require "delegate"
 
-require "acceptable_model/hateos"
+require "acceptable_model/hateoas"
 require "acceptable_model/enumerable"
 
 module AcceptableModel
@@ -24,7 +24,7 @@ module AcceptableModel
   def self.define_class model_object
     """
     class #{model_object} < SimpleDelegator
-      include HATEOS
+      include HATEOAS
       attr_accessor :attributes_block
 
       def initialize params
@@ -63,7 +63,7 @@ module AcceptableModel
         # A list of associations mapped to the presenter
         #
         # Theses associations are linked to the delegated model and will be
-        # included in the delegate models final HATEOS structure.
+        # included in the delegate models final HATEOAS structure.
         #
         attr_accessor :associations
 
@@ -84,7 +84,7 @@ module AcceptableModel
         # Map associations
         #
         # This macro is used to allow users to map associations to a model
-        # allowing for a HATEOS compliant format
+        # allowing for a HATEOAS compliant format
         #
         def relationship association
           @associations = [] if @associations.nil?

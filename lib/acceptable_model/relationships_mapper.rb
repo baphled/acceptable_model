@@ -16,7 +16,7 @@ module AcceptableModel
     #
     # The representation of the model with its relationships and links.
     #
-    # This method is used when we want to get a HATEOS like response.
+    # This method is used when we want to get a HATEOAS like response.
     #
     def representation
       representation = attributes
@@ -76,7 +76,7 @@ module AcceptableModel
     end
 
     #
-    # build the given models HATEOS like links
+    # build the given models HATEOAS like links
     #
     # FIXME Not quite sure how to deal with links that are not children
     #

@@ -1,16 +1,16 @@
 require "spec_helper"
 
-describe AcceptableModel::HATEOS do
+describe AcceptableModel::HATEOAS do
   it "should have a list of relationship types" do
-    AcceptableModel::HATEOS.relationship_types.should eql %w{part_of parent child contains prev next same_as}
+    AcceptableModel::HATEOAS.relationship_types.should eql %w{part_of parent child contains prev next same_as}
   end
 
   describe "#config" do
     it "allows us to add our own rel types" do
-      AcceptableModel::HATEOS.config do |config|
+      AcceptableModel::HATEOAS.config do |config|
         config.relationships = %w{service}
       end
-      AcceptableModel::HATEOS.relationship_types.should include 'service'
+      AcceptableModel::HATEOAS.relationship_types.should include 'service'
     end
   end
 
