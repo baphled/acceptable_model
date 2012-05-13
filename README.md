@@ -47,14 +47,14 @@ So instead of calling a model directly we could do something like this:
     class Artists < Sinatra::Base
       get '/artists.json'
         artists = AcceptableModel::Artist.all
-        artists.to_json
+        artists.for('vnd.acme.artist-v1+json')
       end
     end
 
     class Groups < Sinatra::Base
       get '/collecions.xml'
         groups = AcceptableModel::Groups.all
-        groups.to_xml
+        groups.for('vnd.acme.artist-v1+xml')
       end
     end
 
@@ -79,14 +79,14 @@ for either by providing a simple DSL to allow you to specify the
 expected responses dependant on the version provided.
 
     class AcceptableModel::Artist
-      api ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
+      version ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
         {
           :id => artist.id,
           :name => artist.name
         }
       end
 
-      api ['vnd.acme.artist-v2-json'] do |artist|
+      version ['vnd.acme.artist-v2-json'] do |artist|
         {
           :id => artist.name,
           :name => artist.name
@@ -273,7 +273,7 @@ AcceptableModel define a range of rel values but we should also be able to
 create our own rel types, we could do this via the config method as follows:
 
     AcceptableModel.config do |config|
-      config.relationships = %w{self contains part_of parent child}
+      config.relationships = %w{services jobs queries}
     end
 
 ### Displaying model associations
@@ -284,7 +284,7 @@ looked up via our controllers.
 Should be able to define associations that should include relationships
 
     class AcceptableArtist
-      rel_associations :groups
+      relationship :groups
     end
 
 This allows you to define which methods should be included in the response body
@@ -318,7 +318,8 @@ something like this:
       config.rel_prefix = '/relations/'
     end
 
-  * Extract presentational logic into it's own model
+  * Should be able to specify relationships types when using the relationships macro
+  * hrefs and rels values should be attributes of the link element
 
 ## Contributing
 
