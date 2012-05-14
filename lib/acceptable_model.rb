@@ -52,6 +52,11 @@ module AcceptableModel
         representation(map[:attributes]).send format.to_sym
       end
 
+      #
+      # Return a HATEOAS presentation of the model
+      #
+      # FIXME: Make setting the class name as a key optional
+      #
       def representation attributes_block
         klass =  'AcceptableModel::#{model_object}'.constantize
         mapper = RelationshipsMapper.new :model => self, :response_block => self.response_block, :attributes_block => attributes_block, :associations => klass.associations
@@ -103,7 +108,9 @@ module AcceptableModel
         attr_accessor :version_mapper
 
         #
-        # Maps API version and MIME type
+        # Maps API version and response type
+        #
+        # FIXME Change this to reponse
         #
         def version versions, &block
           @version_mapper = [] if @version_mapper.nil?
@@ -122,8 +129,8 @@ module AcceptableModel
         end
 
         #
-        # Overide the models #all method so that we can extend the array with
-        # our own functionality
+        # A collection of models needs to be dealt with in the same way as a
+        # single model
         #
         def all
           models = super
