@@ -10,7 +10,7 @@ describe AcceptableModel do
     AcceptableModel.define 'artist'
 
     class AcceptableModel::Artist
-      version ['application/json', 'application/xml', 'vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
+      version ['json', 'xml', 'vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
         { :id => artist.id, :name => artist.name }
       end
     end

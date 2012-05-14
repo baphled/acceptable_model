@@ -64,7 +64,7 @@ module AcceptableModel
       #
       def mime_type_lookup mime_type
         respond_with = version_lookup mime_type
-        mime_type.gsub('application/','').split('+').last unless respond_with.nil?
+        mime_type.split('+').last unless respond_with.nil?
       end
 
       #
@@ -85,6 +85,7 @@ module AcceptableModel
       #
       def strip_extra_header_info! mime_type
         mime_type.slice! /(;[a-z0-9]+[a-z]+=?[a-z]*-?[0-9])+/
+        mime_type.gsub!('application/','')
       end
 
       class << self
