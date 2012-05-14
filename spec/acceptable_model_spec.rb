@@ -10,8 +10,19 @@ describe AcceptableModel do
     AcceptableModel.define 'artist'
 
     class AcceptableModel::Artist
-      version ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
+      version ['application/json', 'application/xml', 'vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
         { :id => artist.id, :name => artist.name }
+      end
+    end
+  end
+
+  describe "#mime_type_lookup" do
+    context "passing the whole accepted header" do
+      it "should be able to take the 'application/' prefix" do
+        model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
+        expect {
+          model.for('application/json')
+        }.to_not raise_error Exception
       end
     end
   end

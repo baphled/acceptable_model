@@ -63,7 +63,7 @@ module AcceptableModel
       #
       def mime_type_lookup mime_type
         respond_with = version_lookup mime_type
-        mime_type.split('+').last unless respond_with.nil?
+        mime_type.gsub('application/','').split('+').last unless respond_with.nil?
       end
 
       #
