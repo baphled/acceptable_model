@@ -1,8 +1,7 @@
 # AcceptableModel
-
 Inpired by a conversation with [@craigwebster](http://twitter.com/craigwebster) and from reading [@avdi](http://twitter.com/avdi)
-[Objects on Rails](http://devblog.avdi.org/2011/11/15/early-access-beta-of-objects-on-rails-now-available-2) book I've been thinking lately about APIs and how to
-separate presentation logic from controllers and models in a clean way.
+[Objects on Rails](http://devblog.avdi.org/2011/11/15/early-access-beta-of-objects-on-rails-now-available-2) book I've been thinking lately about RESTful APIs and how to
+separate presentation logic from controllers and models in a clean way expressive way.
 
 So we have a model, that has a few associations and accessors
 
@@ -28,19 +27,19 @@ So we have a model, that has a few associations and accessors
       end
     end
 
-Now it'd be cool if we could build upon our object to include relationships
-between associations and provide a HATEOAS like API without cluttering up a
-beautiful slim controllers.
+Now it'd be cool if we could build upon our object to include these
+associations and provide a HATEOAS like API without cluttering up a beautifully
+slim controllers.
 
-It'd be nice if we could simply delegate to our created model and have a
-Presenter like model that deals with all the presentational logic for
+It'd be nice if we could simply instantiate an object that knows allow about
+our model and it's exposed interface and isolates our presentational logic for
 us.
 
-We want this to be with a little ceremony as possible and make sure that our
-models truely stay separate from our presentation logic.
+We want this to be done with as little ceremony as possible and make sure that
+our models truly stay separate from our presentation logic.
 
 So we can define an object `AcceptableModel.define 'artist'` and then you have
-a Presenter like object that deals with our output.
+an object that purely deals with outputting a HATEOAS response.
 
 So instead of calling a model directly we could do something like this:
 
@@ -58,21 +57,22 @@ So instead of calling a model directly we could do something like this:
       end
     end
 
-Wouldn't that be cool, our models shouldn't know about presentation
-logic and our controller should be a thin as possible
+Wouldn't that be cool, our models shouldn't know about presentation logic and
+our controller should be a thin as possible. We also get the bonus of not
+having to worry about the response type, allowing us to focus on the task at
+hand.
 
 By default AcceptableModel::Artist will include all accessor methods that the Artist
-class exposes whilst knowing about how to deal with the models
-relationships and representing this in a HATEOAS format.
+class exposes whilst knowing about how to deal with the models relationships
+and representing this in a HATEOAS format.
 
-### Separating presentation with versioning
+### Setting up AcceptableModel
 
-This is all well and good but we may want to version our responses and
-respond differently dependantly on the format and version specified by a
-user.
+This is all well and good but we may want to version our responses and respond
+differently based on the response type and/or version specified by a user.
 
-Typically we would put these details in our controllers or create
-seperate views.
+Typically we would put these details in our controllers or create separate
+views dependant on the version. This is all kinds of annoying.
 
 AcceptableModel takes this one step further and totally removes the need
 for either by providing a simple DSL to allow you to specify the
@@ -98,53 +98,55 @@ expected responses dependant on the version provided.
       end
     end
 
-AcceptableModel doesn't try to deal with HTTP requests, it merely
-creates a wrapper object that replicates the HATEOAS response format, so
-calling `artist.for('vnd.acme.artist-v1+json')` returns the following response:
+AcceptableModel doesn't try to deal with HTTP requests, it merely creates a
+wrapper object that replicates the HATEOAS response format, so calling
+`artist.for('vnd.acme.artist-v1+json')` returns the following response:
 
-    {
-      'id': 'busta-rhymes',
-      'name': 'Busta Rhymes',
-      'debut': '1990',
-      'groups' => [
-        {
-          'id' => 'flipmode-squad',
-          'name' => 'Flipmode Squad',
-          'links' => [
-            {
-             'href' => '/groups/flipmode-squad',
-             'rel' => '/children'
-            }
-          ]
-        },
-        {
-          'id' => 'leaders-of-the-new-school',
-          'name' => 'Leaders of The New School',
-          'links' => [
-            {
-             'href' => '/groups/leaders-of-the-new-school',
-             'rel' => '/children'
-            }
-          ]
-        }
-      ],
-      'links': [
-        {
-          'href': '/artists/busta_rhymes',
-          'rel': '/self'
-        },
-        {
-          'href': '/collections/leaders-of-the-new-school',
-          'rel': '/partOf'
-        },
-        {
-          'href': '/collections/flipmode-squad',
-          'rel': '/partOf'
-        }
-      ]
+    { 'artist' =>
+      {
+        'id': 'busta-rhymes',
+        'name': 'Busta Rhymes',
+        'debut': '1990',
+        'groups' => [
+          {
+            'id' => 'flipmode-squad',
+            'name' => 'Flipmode Squad',
+            'links' => [
+              {
+               'href' => '/groups/flipmode-squad',
+               'rel' => '/children'
+              }
+            ]
+          },
+          {
+            'id' => 'leaders-of-the-new-school',
+            'name' => 'Leaders of The New School',
+            'links' => [
+              {
+               'href' => '/groups/leaders-of-the-new-school',
+               'rel' => '/children'
+              }
+            ]
+          }
+        ],
+        'links': [
+          {
+            'href': '/artists/busta_rhymes',
+            'rel': '/self'
+          },
+          {
+            'href': '/collections/leaders-of-the-new-school',
+            'rel': '/partOf'
+          },
+          {
+            'href': '/collections/flipmode-squad',
+            'rel': '/partOf'
+          }
+        ]
+      }
     }
 
-or calling `artist.for('vnd.acme.artist-v1+xml')` would yield:
+Or calling `artist.for('vnd.acme.artist-v1+xml')` would yield:
 
     <?xml version="1.0" encoding="UTF-8"?>
     <artist>
@@ -217,37 +219,39 @@ Defining these methods exposes the objects relationships, visiting the resource
 
     artist = AcceptableModel::Artist.first
 
-exposes the following response.
+Exposes the following response.
 
-    {
-      'name': 'Busta Rhymes',
-      'debut': '1990',
-      'albums': [
-        'name': 'The Coming',
+    { 'artist' =>
+      {
+        'name': 'Busta Rhymes',
+        'debut': '1990',
+        'albums': [
+          'name': 'The Coming',
+          'links': [
+            {
+              'href': '/albums/the-coming',
+              'rel': '/child'
+            }
+          ]
+        ],
+        'songs': [
+          {'title': 'Gimme Some more', 'duration': '4:05'}
+        ],
         'links': [
           {
-            'href': '/albums/the-coming',
-            'rel': '/child'
+            'href': '/artists/cilla_black',
+            'rel': '/self'
+          },
+          {
+            'href': '/collections/leaders-of-the-new-school',
+            'rel': '/partOf'
+          },
+          {
+            'href': '/collections/Flipmode-squad',
+            'rel': '/partOf'
           }
         ]
-      ],
-      'songs': [
-        {'title': 'Gimme Some more', 'duration': '4:05'}
-      ],
-      'links': [
-        {
-          'href': '/artists/cilla_black',
-          'rel': '/self'
-        },
-        {
-          'href': '/collections/leaders-of-the-new-school',
-          'rel': '/partOf'
-        },
-        {
-          'href': '/collections/Flipmode-squad',
-          'rel': '/partOf'
-        }
-      ]
+      }
     }
 
 All this from a few lines of code :D
@@ -263,7 +267,7 @@ create our own rel types, we could do this via the config method as follows:
 
 ### Displaying model associations
 
-In true DRY fashion there is not need define a links href as they will be
+In true DRY fashion there is not need define a links HREF as they will be
 looked up via our controllers.
 
 Should be able to define associations that should include relationships
@@ -277,35 +281,26 @@ along with their associated links.
 
 When calling `model.all` the output will now be as following:
 
-    {
-      'name': 'Busta Rhymes',
-      'debut': '1990'
-      'albums': [
-        'name': 'The Coming',
-        'links': [
-          {
-            'href': '/albums/the-coming',
-            'rel': '/children'
-          }
+    { 
+      'artist' => {
+        'name': 'Busta Rhymes',
+        'debut': '1990'
+        'albums': [
+          'name': 'The Coming',
+          'links': [
+            {
+              'href': '/albums/the-coming',
+              'rel': '/children'
+            }
+          ]
         ]
-      ]
+      }
     }
+
 
 ## TODO
 
-  * Add prefixes to relationships
-
-We should also be able to easily change the rel attributes so that we can fully
-customised the way they are displayed. It would be nice if we could do
-something like this:
-
-    AcceptableModel.config do |config|
-      config.rel_prefix = '/relations/'
-    end
-
-  * Should be able to specify relationships types when using the relationships macro
-  * Should be able to specify attributes that should be wrapped in CDATA
-  * It should accept basic mime types
+  [Enhancements](https://github.com/baphled/acceptable_model/issues?labels=enhancement&milestone=none&page=1&state=open)
 
 ## Contributing
 
