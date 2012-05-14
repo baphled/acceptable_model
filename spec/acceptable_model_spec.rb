@@ -103,6 +103,13 @@ describe AcceptableModel do
       model.for('vnd.acme.artist-v1+json').should eql expected.to_json
     end
 
+    it "should handle any extra information passed via the header" do
+      model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
+      expect {
+        model.for('application/xml;charset=utf-8')
+      }.to_not raise_error Exception
+    end
+
     context "extended relationships" do
       let(:relationships) {
         { :artist =>
