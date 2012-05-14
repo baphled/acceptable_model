@@ -209,36 +209,23 @@ describe AcceptableModel do
     context "can work out basic mime types" do
       before do
         class AcceptableModel::Artist
-          version ['json', 'xml', 'javascript'] do |artist|
+          version ['json', 'xml'] do |artist|
             { :id => artist.id, :name => artist.name }
           end
         end
       end
 
       it "can handle json" do
-        expected = { :artist => {
-            :id => 'busta-rhymes',
-            :name => 'Busta Rhymes',
-            :links => [
-              {
-                :href => '/artists/busta-rhymes',
-                :rel => '/self'
-              }
-            ]
-          }
-        }
         model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
-        model.for('json').should eql expected.to_json
+        model.mime_type_lookup('application/json').should eql 'json'
       end
 
       it "can handle xml" do
-        expected = File.open('spec/fixtures/artist.xml').read
         model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
-        model.for('xml').should eql expected
+        model.mime_type_lookup('application/xml').should eql 'xml'
       end
 
       it "can handle jsonp"
     end
   end
-
 end

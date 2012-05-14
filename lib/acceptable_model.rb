@@ -45,7 +45,6 @@ module AcceptableModel
       # complicating our models, controllers or duplicating our code base 
       #
       def for mime_type
-        strip_extra_header_info! mime_type
         map  = version_lookup mime_type
         raise MimeTypeNotReckonised.new mime_type if map.nil?
         mime = mime_type_lookup mime_type
@@ -73,6 +72,7 @@ module AcceptableModel
       # This allows the interface user to have differing versions of the same model
       #
       def version_lookup mime_type
+        strip_extra_header_info! mime_type
         klass = 'AcceptableModel::#{model_object}'.constantize
         mappers = klass.version_mapper
         mappers.detect { |mapper| mime_type == mapper[:version] }
@@ -84,7 +84,7 @@ module AcceptableModel
       # Need to strip away any extra information passed on to a 'Accept' header
       #
       def strip_extra_header_info! mime_type
-        mime_type.slice! /(;[a-z0-9]+[a-z]+=?[a-z]*-?[0-9])+/
+        mime_type.slice! /(;[a-z0-9]+[a-z]+=?[a-z]*-?[0-9])+$/
         mime_type.gsub!('application/','')
       end
 
