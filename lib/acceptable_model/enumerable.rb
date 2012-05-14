@@ -16,6 +16,8 @@ module AcceptableModel
       attributes_for(mime_type).send format
     end
 
+    protected
+
     def attributes_for mime_type
       attributes = collect do |model|
         map = model.version_lookup mime_type
@@ -26,8 +28,11 @@ module AcceptableModel
     end
 
     def representation model, attributes_block
-      mapper = RelationshipsMapper.new :model => model, :response_block => model.response_block, :attributes_block => attributes_block, :associations => model.associations
-      mapper.representation.to_hash
+      mapper(model, attributes_block).representation.to_hash
+    end
+
+    def mapper model, attributes_block
+      RelationshipsMapper.new :model => model, :response_block => model.response_block, :attributes_block => attributes_block, :associations => model.associations
     end
 
     def model_attributes model, attributes

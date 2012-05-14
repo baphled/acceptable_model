@@ -58,9 +58,7 @@ module AcceptableModel
       # FIXME: Make setting the class name as a key optional
       #
       def representation attributes_block
-        klass =  'AcceptableModel::#{model_object}'.constantize
-        mapper = RelationshipsMapper.new :model => self, :response_block => self.response_block, :attributes_block => attributes_block, :associations => klass.associations
-        Representation.new self.class.to_s.downcase => mapper.representation
+        Representation.new self.class.to_s.downcase => mapper(attributes_block).representation
       end
 
       #
@@ -69,6 +67,14 @@ module AcceptableModel
       def mime_type_lookup mime_type
         respond_with = version_lookup mime_type
         mime_type.split('+').last unless respond_with.nil?
+      end
+
+      #
+      # Maps attributes to to representational model
+      #
+      def mapper attributes_block
+        klass =  'AcceptableModel::#{model_object}'.constantize
+        mapper = RelationshipsMapper.new :model => self, :response_block => self.response_block, :attributes_block => attributes_block, :associations => klass.associations
       end
 
       #
