@@ -17,8 +17,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "acceptable_model"
   gem.homepage = "http://github.com/baphled/acceptable_model"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  s.summary = "Abstracting API presentational logic"
+  gem.description = "Abstracting API presentational logic"
   gem.email = "baphled@boodah.net"
   gem.authors = ["Yomi Colledge"]
   # dependencies defined in Gemfile
