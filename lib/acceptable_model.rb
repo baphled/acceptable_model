@@ -134,6 +134,11 @@ module AcceptableModel
           @associations << association.to_s unless @associations.include? association.to_s
         end
 
+        def find params = {}
+          model = super
+          new model.attributes
+        end
+
         #
         # A collection of models needs to be dealt with in the same way as a
         # single model
