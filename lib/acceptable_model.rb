@@ -153,8 +153,8 @@ module AcceptableModel
         #
         # Delegate class methods to the correct object
         #
-        def method_missing method, *args
-          ::#{model_object}.send(method,args)
+        def method_missing method, *args, &block
+          ::#{model_object}.send(method,*args, &block)
         end
       end
 

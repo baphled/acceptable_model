@@ -53,4 +53,9 @@ class Example < Sinatra::Base
     artist = AcceptableModel::Artist.find :id => params[:id]
     artist.for respond_to
   end
+
+  get '/artists' do
+    artists = AcceptableModel::Artist.all
+    artists.for respond_to
+  end
 end
