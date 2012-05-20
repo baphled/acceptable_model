@@ -21,7 +21,7 @@ describe AcceptableModel do
       it "should be able to take the 'application/' prefix" do
         model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
         expect {
-          model.for('application/json')
+          model.for('json')
         }.to_not raise_error Exception
       end
     end
@@ -106,7 +106,7 @@ describe AcceptableModel do
     it "should handle any extra information passed via the header" do
       model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
       expect {
-        model.for('application/xml;charset=utf-8')
+        model.for('xml')
       }.to_not raise_error Exception
     end
 
@@ -222,7 +222,7 @@ describe AcceptableModel do
 
       it "can handle xml" do
         model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
-        model.mime_type_lookup('application/xml').should eql 'xml'
+        model.mime_type_lookup('text/xml').should eql 'xml'
       end
 
       it "can handle jsonp"

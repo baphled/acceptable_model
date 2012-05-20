@@ -97,8 +97,8 @@ module AcceptableModel
       # Need to strip away any extra information passed on to a 'Accept' header
       #
       def strip_extra_header_info! mime_type
-        mime_type.slice! /(;[a-z0-9]+[a-z]+=?[a-z]*-?[0-9])+$/
         mime_type.gsub!('application/','')
+        mime_type.gsub!('text/','')
       end
 
       class << self
