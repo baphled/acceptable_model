@@ -93,7 +93,7 @@ module AcceptableModel
       protected
 
       #
-      # Need to strip away any extra information passed on to a 'Accept' header
+      # Used to work out how to respond to the API request
       #
       def strip_extra_header_info mime_type
         mime_type
