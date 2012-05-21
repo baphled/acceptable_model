@@ -25,6 +25,28 @@ describe AcceptableModel do
         }.to_not raise_error Exception
       end
     end
+
+    context "can work out basic mime types" do
+      before do
+        class AcceptableModel::Artist
+          version ['application/json', 'application/xml'] do |artist|
+            { :id => artist.id, :name => artist.name }
+          end
+        end
+      end
+
+      it "can handle json" do
+        model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
+        model.mime_type_lookup('application/json').should eql 'json'
+      end
+
+      it "can handle xml" do
+        model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
+        model.mime_type_lookup('application/xml').should eql 'xml'
+      end
+
+      it "can handle jsonp"
+    end
   end
 
   describe "#attributes" do
@@ -202,30 +224,6 @@ describe AcceptableModel do
           model.for('vnd.acme.artist-v1+foo')
         }.to raise_error AcceptableModel::MimeTypeNotReckonised
       end
-    end
-  end
-
-  describe "#mime_type_lookup" do
-    context "can work out basic mime types" do
-      before do
-        class AcceptableModel::Artist
-          version ['application/json', 'application/xml'] do |artist|
-            { :id => artist.id, :name => artist.name }
-          end
-        end
-      end
-
-      it "can handle json" do
-        model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
-        model.mime_type_lookup('application/json').should eql 'json'
-      end
-
-      it "can handle xml" do
-        model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
-        model.mime_type_lookup('application/xml').should eql 'xml'
-      end
-
-      it "can handle jsonp"
     end
   end
 end
