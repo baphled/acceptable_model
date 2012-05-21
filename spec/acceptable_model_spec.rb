@@ -63,7 +63,7 @@ describe AcceptableModel do
     end
   end
 
-	describe "#relationship" do
+	describe "#associations" do
 		before :each do
 			class AcceptableModel::Artist
 				relationship :groups
