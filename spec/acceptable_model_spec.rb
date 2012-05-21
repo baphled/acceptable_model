@@ -63,6 +63,38 @@ describe AcceptableModel do
     end
   end
 
+	describe "#relationship" do
+		before :each do
+			class AcceptableModel::Artist
+				relationship :groups
+			end
+		end
+
+		after do
+			AcceptableModel.send :remove_const, :Artist
+		end
+
+		it "appends the associations" do
+			model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
+			AcceptableModel::Artist.associations.should eql [ 'groups' ]
+		end
+	end
+
+	describe "associations_by_version" do
+		before :each do
+			class AcceptableModel::Artist
+				relationship :groups, :versions => ['application/json', 'text/xml']
+			end
+		end
+
+		after do
+			AcceptableModel.send :remove_const, :Artist
+		end
+		it "returns the associations for the given version" do
+			model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
+			AcceptableModel::Artist.versioned_associations.should eql [ { 'groups' => {:versions => ['application/json', 'text/xml'] } } ]
+		end
+	end
   describe "#define" do
     it "dynamically defines a new class" do
       expect {

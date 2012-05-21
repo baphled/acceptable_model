@@ -109,6 +109,7 @@ module AcceptableModel
         # included in the delegate models final HATEOAS structure.
         #
         attr_accessor :associations
+        attr_accessor :versioned_associations
 
         #
         # List of versions mapped to the presenter
@@ -131,11 +132,19 @@ module AcceptableModel
         # This macro is used to allow users to map associations to a model
         # allowing for a HATEOAS compliant format
         #
-        def relationship association
-          @associations = [] if @associations.nil?
-          @associations << association.to_s unless @associations.include? association.to_s
+        def relationship association, versions = {}
+          @versioned_associations = [] if @associations.nil?
+          @versioned_associations << { association.to_s => versions }
         end
 
+        def associations version = nil
+          @versioned_associations = [] if @versioned_associations.nil?
+          if version.nil?
+            @versioned_associations.collect do |hash|
+              hash.each_key.collect { |key, val| key }
+            end.flatten
+          end
+        end
         def find params = {}
           model = super
           AcceptableModel::#{model_object}.new model.attributes
