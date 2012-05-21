@@ -209,7 +209,7 @@ describe AcceptableModel do
     context "can work out basic mime types" do
       before do
         class AcceptableModel::Artist
-          version ['json', 'xml'] do |artist|
+          version ['application/json', 'application/xml'] do |artist|
             { :id => artist.id, :name => artist.name }
           end
         end
@@ -222,7 +222,7 @@ describe AcceptableModel do
 
       it "can handle xml" do
         model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
-        model.mime_type_lookup('text/xml').should eql 'xml'
+        model.mime_type_lookup('application/xml').should eql 'xml'
       end
 
       it "can handle jsonp"

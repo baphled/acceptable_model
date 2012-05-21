@@ -85,7 +85,6 @@ module AcceptableModel
       # This allows the interface user to have differing versions of the same model
       #
       def version_lookup mime_type
-        mime_type = strip_extra_header_info mime_type
         klass = 'AcceptableModel::#{model_object}'.constantize
         mappers = klass.version_mapper
         mappers.detect { |mapper| mime_type == mapper[:version] }
