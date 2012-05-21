@@ -143,8 +143,13 @@ module AcceptableModel
             @versioned_associations.collect do |hash|
               hash.each_key.collect { |key, val| key }
             end.flatten
+          else
+            @versioned_associations.select do |hash|
+              hash.find { |key, val| val[:version].include? version }
+            end.collect( &:keys ).flatten
           end
         end
+
         def find params = {}
           model = super
           AcceptableModel::#{model_object}.new model.attributes
