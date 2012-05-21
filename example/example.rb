@@ -41,6 +41,12 @@ class Example < Sinatra::Base
     AcceptableModel::Artist.version_mapper.each { |mime| mime_type mime[:version] }
   end
 
+  #
+  # This could be handle by AcceptableApi
+  #
+  # Instead of having to use AcceptableModel in the controller we could call
+  # the normal model and let AcceptableApi delegate to AcceptableModel
+  #
   def respond_to
     mimes = Rack::Accept::MediaType.new request.env['HTTP_ACCEPT']
     accepted = AcceptableModel::Artist.version_mapper.collect { |mime| mime[:version] }
