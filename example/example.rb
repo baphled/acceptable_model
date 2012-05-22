@@ -9,17 +9,47 @@ class Artist
   def initialize params = {}
     self.name = params[:name]
     self.aliases = params[:aliases]
+    self.groups = params[:groups]
     self.id = self.name.downcase.gsub(' ', '-')
     self.attributes = { :id => self.id }
     self.attributes.merge! params
   end
 
   def self.find params = {}
-    new( :name => 'Busta Rhymes', :aliases => 'Busta Bus' )
+    new( :name => 'Busta Rhymes', :aliases => 'Busta Bus', :groups => ['Flipmode Squad', 'Leaders of The New School'] )
+      
   end
 
   def self.all
-    [ new( :name => 'Busta Rhymes', :aliases => 'Busta Bus' ) ]
+    [ find( :id => 'busta-rhymes' ) ]
+  end
+
+  def groups
+    group1 = Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad'
+    group2 = Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school'
+    [group1, group2]
+  end
+
+  protected
+
+  def groups= groups
+    @groups = groups.collect {|group| Group.new :name => group} unless groups.nil?
+  end
+end
+
+class Group
+  attr_accessor :name, :id
+  attr_accessor :attributes
+
+  def initialize params = {}
+    self.name = params[:name]
+    self.id = self.name.downcase.gsub(' ', '-')
+    self.attributes = { :id => self.id }
+    self.attributes.merge! params
+  end
+
+  def attributes
+    @attributes ||= {:id => id, :name => name}
   end
 end
 
@@ -33,6 +63,9 @@ class AcceptableModel::Artist
   version ['application/vnd.acme.artist-v2+json', 'application/vnd.acme.artist-v2+xml'] do |artist|
     {:id => artist.id, :name => artist.name, :aliases => artist.aliases}
   end
+
+  relationship :groups, :version => ['application/vnd.acme.artist-v2+json']
+
 end
 
 class Example < Sinatra::Base
