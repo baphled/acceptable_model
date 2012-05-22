@@ -17,7 +17,7 @@ Jeweler::Tasks.new do |gem|
   gem.name = "acceptable_model"
   gem.homepage = "http://github.com/baphled/acceptable_model"
   gem.license = "MIT"
-  s.summary = "Abstracting API presentational logic"
+  gem.summary = "Abstracting API presentational logic"
   gem.description = "Abstracting API presentational logic"
   gem.email = "baphled@boodah.net"
   gem.authors = ["Yomi Colledge"]
