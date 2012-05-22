@@ -79,14 +79,14 @@ for either by providing a simple DSL to allow you to specify the
 expected responses dependant on the version provided.
 
     class AcceptableModel::Artist
-      version ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
+      mime_types ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
         {
           :id => artist.id,
           :name => artist.name
         }
       end
 
-      version ['vnd.acme.artist-v2-json'] do |artist|
+      mime_types ['vnd.acme.artist-v2-json'] do |artist|
         {
           :id => artist.name,
           :name => artist.name

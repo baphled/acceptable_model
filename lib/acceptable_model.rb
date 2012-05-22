@@ -119,7 +119,7 @@ module AcceptableModel
         #
         # Maps API version and response type
         #
-        # FIXME Change this to reponse
+        # FIXME: Need to depricate version
         #
         def version versions, &block
           @version_mapper = [] if @version_mapper.nil?
