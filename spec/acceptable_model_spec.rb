@@ -254,7 +254,7 @@ describe AcceptableModel do
             }
           end
 
-          relationship :groups
+          relationship :groups, :version => [ 'vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml' ]
 
           def part_of
             groups.all

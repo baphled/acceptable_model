@@ -51,7 +51,7 @@ module AcceptableModel
         raise MimeTypeNotReckonised.new mime_type if map.nil?
         mime = mime_type_lookup mime_type
         format = 'to_' + mime
-        representation(map[:attributes]).send format.to_sym
+        representation(map[:attributes], mime_type).send format.to_sym
       end
 
       #
@@ -59,8 +59,8 @@ module AcceptableModel
       #
       # FIXME: Make setting the class name as a key optional
       #
-      def representation attributes_block
-        Representation.new self.class.to_s.downcase => mapper(attributes_block).representation
+      def representation attributes_block, version
+        Representation.new self.class.to_s.downcase => mapper(attributes_block, version).representation
       end
 
       #
@@ -74,9 +74,9 @@ module AcceptableModel
       #
       # Maps attributes to to representational model
       #
-      def mapper attributes_block
+      def mapper attributes_block, version
         klass =  'AcceptableModel::#{model_object}'.constantize
-        mapper = RelationshipsMapper.new :model => self, :response_block => self.response_block, :attributes_block => attributes_block, :associations => klass.associations
+        mapper = RelationshipsMapper.new :model => self, :response_block => self.response_block, :attributes_block => attributes_block, :associations => klass.associations( version )
       end
 
       #
@@ -137,6 +137,13 @@ module AcceptableModel
           @versioned_associations << { association.to_s => versions }
         end
 
+        #
+        # Retrieves a list of associations for the model
+        #
+        # If the the version is passed we return the assocations based on that version
+        #
+        # #FIXME Would be nice to be able to set the version internally
+        #
         def associations version = nil
           @versioned_associations = [] if @versioned_associations.nil?
           if version.nil?
@@ -145,7 +152,7 @@ module AcceptableModel
             end.flatten
           else
             @versioned_associations.select do |hash|
-              hash.find { |key, val| val[:version].include? version }
+              hash.find { |key, val| val != {} and val[:version].include? version }
             end.collect( &:keys ).flatten
           end
         end

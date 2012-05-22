@@ -21,18 +21,18 @@ module AcceptableModel
     def attributes_for mime_type
       attributes = collect do |model|
         map = model.version_lookup mime_type
-        representation model, map[:attributes]
+        representation model, mime_type, map[:attributes]
       end
       class_name = self.first.class.to_s.downcase.pluralize
       Representation.new class_name => attributes
     end
 
-    def representation model, attributes_block
-      mapper(model, attributes_block).representation.to_hash
+    def representation model, mime_type, attributes_block
+      mapper(model, mime_type, attributes_block).representation.to_hash
     end
 
-    def mapper model, attributes_block
-      RelationshipsMapper.new :model => model, :response_block => model.response_block, :attributes_block => attributes_block, :associations => model.associations
+    def mapper model, mime_type, attributes_block
+      RelationshipsMapper.new :model => model, :response_block => model.response_block, :attributes_block => attributes_block, :associations => eval("AcceptableModel::#{model.class}" ).associations(mime_type)
     end
 
     def model_attributes model, attributes
