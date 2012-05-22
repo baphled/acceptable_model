@@ -56,11 +56,11 @@ end
 AcceptableModel.define 'artist'
 
 class AcceptableModel::Artist
-  version ['application/json', 'text/xml', 'application/vnd.acme.artist-v1+json', 'application/vnd.acme.artist-v1+xml'] do |artist|
+  mime_types ['application/json', 'text/xml', 'application/vnd.acme.artist-v1+json', 'application/vnd.acme.artist-v1+xml'] do |artist|
     { :id => artist.id, :name => artist.name }
   end
 
-  version ['application/vnd.acme.artist-v2+json', 'application/vnd.acme.artist-v2+xml'] do |artist|
+  mime_types ['application/vnd.acme.artist-v2+json', 'application/vnd.acme.artist-v2+xml'] do |artist|
     {:id => artist.id, :name => artist.name, :aliases => artist.aliases}
   end
 
