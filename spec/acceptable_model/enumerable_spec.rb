@@ -43,7 +43,7 @@ describe "AcceptableModel::Enumerable" do
 
     before :each do
       class AcceptableModel::Artist
-        version ['vnd.acme.artist-v1+json','vnd.acme.artist-v1+xml'] do |artist|
+        mime_types ['vnd.acme.artist-v1+json','vnd.acme.artist-v1+xml'] do |artist|
           {
             :id => artist.id,
             :name => artist.name

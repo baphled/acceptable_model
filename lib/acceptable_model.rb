@@ -125,6 +125,7 @@ module AcceptableModel
           @version_mapper = [] if @version_mapper.nil?
           versions.collect { |version| @version_mapper <<  {:version => version, :attributes => block } }
         end
+        alias_method :mime_types, :version
 
         #
         # Map associations

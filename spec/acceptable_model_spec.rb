@@ -10,7 +10,7 @@ describe AcceptableModel do
     AcceptableModel.define 'artist'
 
     class AcceptableModel::Artist
-      version ['json', 'xml', 'vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
+      mime_types ['json', 'xml', 'vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
         { :id => artist.id, :name => artist.name }
       end
     end
@@ -29,7 +29,7 @@ describe AcceptableModel do
     context "can work out basic mime types" do
       before do
         class AcceptableModel::Artist
-          version ['application/json', 'application/xml'] do |artist|
+          mime_types ['application/json', 'application/xml'] do |artist|
             { :id => artist.id, :name => artist.name }
           end
         end
@@ -247,7 +247,7 @@ describe AcceptableModel do
 
       before :each do
         class AcceptableModel::Artist
-          version ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
+          mime_types ['vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
             {
               :id => artist.id,
               :name => artist.name
