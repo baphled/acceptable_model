@@ -65,7 +65,6 @@ class AcceptableModel::Artist
   end
 
   relationship :groups, :version => ['application/vnd.acme.artist-v2+json']
-
 end
 
 class Example < Sinatra::Base
