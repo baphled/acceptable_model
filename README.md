@@ -267,8 +267,8 @@ create our own rel types, we could do this via the config method as follows:
 
 ### Displaying model associations
 
-In true DRY fashion there is not need define a links HREF as they will be
-looked up via our controllers.
+In true DRY fashion there is no need to define a links HREF as they will be
+defined via the relationships macro.
 
 Should be able to define associations that should include relationships
 
