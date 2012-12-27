@@ -73,4 +73,48 @@ describe AcceptableModel::DSL do
       }.to_not raise_error NoMethodError
     end
   end
+
+  describe "#associations" do
+
+    context "basic relationships" do
+      before :each do
+        AcceptableModel.define 'artist'
+
+        class AcceptableModel::Artist
+          mime_types ['json', 'xml', 'vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
+            { :id => artist.id, :name => artist.name }
+          end
+
+          relationship :groups
+        end
+      end
+
+      after do
+        AcceptableModel.send :remove_const, :Artist
+      end
+
+      it "get a list of custom mime types" do
+        expected = ['groups']
+        AcceptableModel::Artist.associations.should eql expected
+      end
+    end
+
+    context "versioned relationships" do
+      before :each do
+        AcceptableModel.define 'artist'
+
+        class AcceptableModel::Artist
+          mime_types ['json', 'xml', 'vnd.acme.artist-v1+json', 'vnd.acme.artist-v1+xml'] do |artist|
+            { :id => artist.id, :name => artist.name }
+          end
+          relationship :singles, :version => ['xml']
+        end
+      end
+
+      it "only finds associations that match the given mime type" do
+        AcceptableModel::Artist.associations('json').should eql []
+        AcceptableModel::Artist.associations.should eql ['singles']
+      end
+    end
+  end
 end

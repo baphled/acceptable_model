@@ -52,6 +52,7 @@ module AcceptableModel
       # If the the version is passed we return the assocations based on that version
       #
       # #FIXME Would be nice to be able to set the version internally
+      # TODO: Move to part of the API
       #
       def associations version = nil
         @versioned_associations = [] if @versioned_associations.nil?
