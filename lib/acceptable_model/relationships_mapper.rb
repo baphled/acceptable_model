@@ -50,7 +50,8 @@ module AcceptableModel
     def relationships
       return [] if associations.nil?
       associations.collect { |related_association|
-        { related_association.to_sym => model_attributes( model, related_association ) }
+        params = model_attributes model, related_association
+        { related_association.to_sym => params }
       }
     end
 
