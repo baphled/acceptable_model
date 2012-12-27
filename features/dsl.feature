@@ -95,7 +95,7 @@ Feature: Acceptable model DSL
     Then there should be a 1 "groups" entry
 
   @wip
-  Scenario: Includes the models relationship
+  Scenario: Relationships should use their own custom mime types is they are defined
     Given there is an artist associated to a group
     And the "artist" is defined as an AcceptableModel
     And the "group" is defined as an AcceptableModel
