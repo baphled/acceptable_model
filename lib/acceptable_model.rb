@@ -12,7 +12,6 @@ module AcceptableModel
   def self.define model
     dynamic_name = "#{model.to_s.capitalize}"
     raise ModelNotFound if not Object.const_defined? dynamic_name
-    model_object = model.to_s.capitalize.constantize
     eval define_class dynamic_name
   end
 
