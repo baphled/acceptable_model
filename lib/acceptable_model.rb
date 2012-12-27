@@ -100,6 +100,20 @@ module AcceptableModel
           .gsub('text/','')
       end
 
+      #
+      # Set to the delegated model
+      #
+      def to_model
+        __getobj__
+      end
+
+      #
+      # Lies and tells us that this object is actually the delegated model 
+      #
+      def class
+        __getobj__.class
+      end
+
       class << self
         #
         # A list of associations mapped to the presenter
@@ -184,20 +198,6 @@ module AcceptableModel
         def method_missing method, *args, &block
           ::#{model_object}.send(method,*args, &block)
         end
-      end
-
-      #
-      # Set to the delegated model
-      #
-      def to_model
-        __getobj__
-      end
-
-      #
-      # Lies and tells us that this object is actually the delegated model 
-      #
-      def class
-        __getobj__.class
       end
     end
     """
