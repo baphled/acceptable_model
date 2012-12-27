@@ -94,6 +94,30 @@ Feature: Acceptable model DSL
     And I make a request for the "artists" resource "busta-rhymes" with "application/vnd.acme.artist-v1+json"
     Then there should be a 1 "groups" entry
 
+  Scenario: A defined relationship also includes its associated links
+    Given there is an artist associated to a group
+    And the "artist" is defined as an AcceptableModel
+    And the "group" is defined as an AcceptableModel
+    When I create the following custom mime types
+    """
+    class AcceptableModel::Group
+      mime_types ['application/vnd.acme.artist-v1+json'] do |artist|
+        { :id => artist.slug, :name => artist.name }
+      end
+    end
+
+    class AcceptableModel::Artist
+      mime_types ['application/vnd.acme.artist-v1+json'] do |artist|
+        { :id => artist.slug, :name => artist.name }
+      end
+
+      relationship :groups, :version => ['application/vnd.acme.artist-v1+json']
+    end
+    """
+    And a service for "artists" has been created
+    And I make a request for the "artists" resource "busta-rhymes" with "application/vnd.acme.artist-v1+json"
+    Then the JSON at "artist/groups/0/links" should have 1 entries
+
   @wip
   Scenario: Relationships should use their own custom mime types is they are defined
     Given there is an artist associated to a group
