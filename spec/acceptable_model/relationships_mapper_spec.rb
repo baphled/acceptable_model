@@ -8,8 +8,8 @@ describe AcceptableModel::RelationshipsMapper do
     }
     AcceptableModel::Artist.new params
   }
-  let(:group1) { Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad' }
-  let(:group2) { Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school' }
+  let(:group1) { Group.new :name => 'Flipmode Squad', :id => 1, :slug => 'flipmode-squad' }
+  let(:group2) { Group.new :name => 'Leaders of The New School',:id => 2,  :slug => 'leaders-of-the-new-school' }
   let(:structure) {
     class Structure
       include AcceptableModel::HATEOAS
