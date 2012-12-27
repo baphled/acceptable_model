@@ -118,14 +118,20 @@ module AcceptableModel
         #
         # Maps API version and response type
         #
-        # FIXME: Need to depricate version
-        #
-        def version versions, &block
+        def mime_types versions, &block
           @version_mapper = [] if @version_mapper.nil?
           versions.collect { |version| @version_mapper <<  {:version => version, :attributes => block } }
         end
-        alias_method :mime_types, :version
 
+        #
+        # Maps API version and response type
+        #
+        # NOTE: Deprecated
+        #
+        def version versions, &block
+          Kernel.warn %s{[DEPRECATION] `version` is deprecated.  Please use `mime_types` instead.}
+          mime_types versions, &block
+        end
         #
         # Map associations
         #

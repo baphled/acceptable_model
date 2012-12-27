@@ -16,6 +16,15 @@ describe AcceptableModel do
     end
   end
 
+  it "deprecates #version" do
+    Kernel.should_receive :warn
+    class AcceptableModel::Artist
+      version ['vnd.acme.artist-v3+xml'] do |artist|
+        { :name => artist.name }
+      end
+    end
+  end
+
   describe "#mime_type_lookup" do
     context "passing the whole accepted header" do
       it "should be able to take the 'application/' prefix" do
