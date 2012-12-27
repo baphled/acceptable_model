@@ -83,8 +83,9 @@ module AcceptableModel
       #
       def response_block
         Proc.new do |model, relationship|
+          id = (model.respond_to? :slug)? model.slug : model.id
           {
-            :href => "/#{model.class.to_s.downcase.pluralize}/#{model.id}",
+            :href => "/#{model.class.to_s.downcase.pluralize}/#{id}",
             :rel => "/#{relationship.camelize :lower}"
           }
         end

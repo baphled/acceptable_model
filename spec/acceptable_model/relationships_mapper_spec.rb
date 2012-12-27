@@ -70,6 +70,16 @@ describe AcceptableModel::RelationshipsMapper do
       }
       mapper.response_block.call( stub(:class => Artist, :id => '123'), 'children' ).should eql expected
     end
+
+    it "uses the models slug if it is available" do
+      expected =
+      {
+        :href => '/artists/busta-rhymes',
+        :rel => '/self'
+      }
+      model = Artist.new :name => 'Busta Rhymes', :slug => 'busta-rhymes', :id => '123'
+      mapper.response_block.call( model, 'self' ).should eql expected
+    end
   end
 
   describe "#representation" do
