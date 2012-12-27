@@ -1,9 +1,9 @@
 require "delegate"
 
-require "acceptable_model/hateoas"
-require "acceptable_model/enumerable"
-require "acceptable_model/representation"
-require "acceptable_model/relationships_mapper"
+require_relative "acceptable_model/hateoas"
+require_relative "acceptable_model/enumerable"
+require_relative "acceptable_model/representation"
+require_relative "acceptable_model/relationships_mapper"
 
 module AcceptableModel
   #

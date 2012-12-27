@@ -1,7 +1,7 @@
 require "active_support/all"
 require "json"
 
-require "acceptable_model/exceptions"
+require_relative "exceptions"
 
 module AcceptableModel
   #
