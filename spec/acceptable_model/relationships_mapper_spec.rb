@@ -11,12 +11,10 @@ describe AcceptableModel::RelationshipsMapper do
   let(:group1) { Group.new :name => 'Flipmode Squad', :id => 'flipmode-squad' }
   let(:group2) { Group.new :name => 'Leaders of The New School', :id => 'leaders-of-the-new-school' }
   let(:structure) {
-    Proc.new do |model, relationship|
-      {
-        :href => "/#{model.class.to_s.downcase.pluralize}/#{model.id}",
-        :rel => "/#{relationship.camelize :lower}"
-      }
+    class Structure
+      include AcceptableModel::HATEOAS
     end
+    Structure.new.response_block
   }
   let(:associations) { AcceptableModel::Artist.associations }
   let(:attributes) { artist.version_lookup( 'vnd.acme.artist-v1+json')[:attributes] }
