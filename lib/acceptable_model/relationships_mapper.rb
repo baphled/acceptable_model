@@ -54,6 +54,10 @@ module AcceptableModel
       }
     end
 
+    # Return a hash based on the resource requested
+    #
+    # TODO: Use the models mime type instead of the attributes that come directly from the datastore.
+    #
     def model_attributes model, related_association
       return [] if model.send(related_association.to_sym).nil?
       construct_relationship_hash model.send(related_association.to_sym)
