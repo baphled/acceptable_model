@@ -1,6 +1,8 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
+
 require 'rspec'
+require "pry"
 require 'acceptable_model'
 require 'acceptable_model/relationships_mapper'
 require 'acceptable_model/representation'
