@@ -100,7 +100,7 @@ module AcceptableModel
       end
 
       #
-      # Lies and tells us that this object is actually the delegated model 
+      # Lies and tells us that this object is actually the delegated model link
       #
       def class
         __getobj__.class
