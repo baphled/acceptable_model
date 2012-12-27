@@ -29,8 +29,7 @@ module AcceptableModel
       attr_accessor :attributes_block
 
       def initialize params
-        @delegate_model = ::#{model_object}.new params
-        super @delegate_model
+        super ::#{model_object}.new params
       end
 
       #
@@ -74,8 +73,12 @@ module AcceptableModel
       # Maps attributes to to representational model
       #
       def mapper attributes_block, version
-        klass =  'AcceptableModel::#{model_object}'.constantize
-        mapper = RelationshipsMapper.new :model => self, :response_block => self.response_block, :attributes_block => attributes_block, :associations => klass.associations( version )
+        RelationshipsMapper.new(
+          :model => self,
+          :response_block => self.response_block,
+          :attributes_block => attributes_block,
+          :associations => klass.associations( version )
+        )
       end
 
       #
@@ -84,20 +87,8 @@ module AcceptableModel
       # This allows the interface user to have differing versions of the same model
       #
       def version_lookup mime_type
-        klass = 'AcceptableModel::#{model_object}'.constantize
         mappers = klass.version_mapper
         mappers.detect { |mapper| mime_type == mapper[:version] }
-      end
-
-      protected
-
-      #
-      # Used to work out how to respond to the API request
-      #
-      def strip_extra_header_info mime_type
-        mime_type
-          .gsub('application/','')
-          .gsub('text/','')
       end
 
       #
@@ -112,6 +103,21 @@ module AcceptableModel
       #
       def class
         __getobj__.class
+      end
+
+      protected
+
+      def klass
+        'AcceptableModel::#{model_object}'.constantize
+      end
+
+      #
+      # Used to work out how to respond to the API request
+      #
+      def strip_extra_header_info mime_type
+        mime_type
+          .gsub('application/','')
+          .gsub('text/','')
       end
 
       class << self
@@ -179,7 +185,7 @@ module AcceptableModel
 
         def find params = {}
           model = super
-          AcceptableModel::#{model_object}.new model.attributes
+          ::#{model_object}.new model.attributes
         end
 
         #
