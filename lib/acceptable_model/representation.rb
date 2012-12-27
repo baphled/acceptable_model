@@ -27,28 +27,28 @@ module AcceptableModel
       @attributes
     end
 
-    def walk_node node, attributes
+    def walk_node original_node, attributes
       attributes.each do |k,v|
         if k.to_s == 'links'
-          node.links do |node|
+          original_node.links do |node|
             attributes[k].collect do |link|
               node.link(link)
             end
           end
         elsif v.class == Hash
-          node.__send__ k do |children|
+          original_node.__send__ k do |children|
             walk_node children, v
           end
         elsif v.class == Array
-          node.__send__ k do |children|
+          original_node.__send__ k do |children|
             v.collect do |attr|
-              node.__send__ k.to_s.singularize do |child|
+              original_node.__send__ k.to_s.singularize do |child|
                 walk_node child, attr
               end
             end
           end
         else
-          eval "node.#{ k } v"
+          eval "original_node.#{ k } v"
         end
       end
     end
