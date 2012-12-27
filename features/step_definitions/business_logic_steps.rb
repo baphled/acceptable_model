@@ -36,7 +36,8 @@ Given /^there is an artist associated to a group$/ do
   end
 
   group = Group.create :name => 'Leaders of the new skool'
-  a = Artist.create :name => 'Busta Rhymes', :groups => [group]
+  artist = Artist.create :name => 'Busta Rhymes'
+  artist.groups << group
 end
 
 When /^I create the following custom mime types$/ do |mime_type_definition|
