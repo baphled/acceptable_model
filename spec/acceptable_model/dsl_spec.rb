@@ -42,7 +42,7 @@ describe AcceptableModel::DSL do
     it "should allow me to define a versioned response" do
       expect {
         class AcceptableModel::Artist
-          mime_types ['json'] do |artist|
+          mime_types ['vnd.acme.artist-v3+xml'] do |artist|
             { :id => artist.id, :name => artist.name }
           end
         end
