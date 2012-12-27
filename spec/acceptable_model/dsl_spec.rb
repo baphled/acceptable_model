@@ -58,4 +58,19 @@ describe AcceptableModel::DSL do
       end
     end
   end
+
+  describe "#relationship" do
+    after do
+      AcceptableModel.send :remove_const, :Artist
+    end
+
+    it "handles response relationships" do
+      AcceptableModel.define 'artist'
+      expect {
+        class AcceptableModel::Artist
+          relationship :groups
+        end
+      }.to_not raise_error NoMethodError
+    end
+  end
 end
