@@ -124,7 +124,7 @@ module AcceptableModel
       class << self
         def find params = {}
           model = super
-          ::#{model_object}.new model.attributes
+          AcceptableModel::#{model_object}.new model.attributes
         end
 
         #
