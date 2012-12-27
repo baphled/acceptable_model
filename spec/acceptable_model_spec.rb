@@ -16,15 +16,6 @@ describe AcceptableModel do
     end
   end
 
-  it "deprecates #version" do
-    Kernel.should_receive :warn
-    class AcceptableModel::Artist
-      version ['vnd.acme.artist-v3+xml'] do |artist|
-        { :name => artist.name }
-      end
-    end
-  end
-
   describe "#mime_type_lookup" do
     context "passing the whole accepted header" do
       it "should be able to take the 'application/' prefix" do
@@ -125,25 +116,6 @@ describe AcceptableModel do
     it "returns the associations for the given version" do
       model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
       AcceptableModel::Artist.versioned_associations.should eql [ { 'groups' => {:versions => ['application/json', 'text/xml'] } } ]
-    end
-  end
-
-  describe "#define" do
-    it "dynamically defines a new class" do
-      expect {
-        AcceptableModel::Artist.new :name => 'Busta Rhymes'
-      }.to_not raise_error Exception
-    end
-
-    it "can only define if the model is defined" do
-      expect {
-        AcceptableModel.define 'gopher'
-      }.to raise_error AcceptableModel::ModelNotFound
-    end
-
-    it "exposes the originating models accessors" do
-      model = AcceptableModel::Artist.new :name => 'Busta Rhymes'
-      model.name.should eql 'Busta Rhymes'
     end
   end
 
