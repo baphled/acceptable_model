@@ -15,6 +15,30 @@ Given /^the "(.*?)" is defined as an AcceptableModel$/ do |model|
   AcceptableModel.define model
 end
 
+Given /^there is an artist associated to a group$/ do
+  class Group
+    include Mongoid::Document
+    include Mongoid::Slug
+
+    field :name
+    slug :name
+
+  end
+
+  class Artist
+    include Mongoid::Document
+    include Mongoid::Slug
+
+    field :name
+    slug :name
+
+    has_and_belongs_to_many :groups
+  end
+
+  group = Group.create :name => 'Leaders of the new skool'
+  a = Artist.create :name => 'Busta Rhymes', :groups => [group]
+end
+
 When /^I create the following custom mime types$/ do |mime_type_definition|
   eval mime_type_definition
 end
