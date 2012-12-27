@@ -66,13 +66,22 @@ module AcceptableModel
     # corresponding links
     #
     def construct_relationship_hash association
-      if association.class != Array
+      if not enumerator_types.include? association.class
         association.attributes.merge! build_links association, 'children'
       else
         association.collect { |associated_model| 
           associated_model.attributes.merge! build_links associated_model, 'children'
         }
       end
+    end
+
+    def enumerator_types
+      list = [Array]
+      begin
+        list << Mongoid::Relations::Targets::Enumerable
+      rescue NameError
+      end
+      list
     end
 
     #
