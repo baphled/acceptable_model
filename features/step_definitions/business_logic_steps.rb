@@ -44,6 +44,12 @@ When /^I create the following custom mime types$/ do |mime_type_definition|
   eval mime_type_definition
 end
 
+Then /^there should be a (\d+) "(.*?)" entry$/ do |amount, resource|
+  steps %{
+    Then the JSON at "artist/groups" should have #{amount.to_i} entries
+  }
+end
+
 When /^a service for "(.*?)" has been created$/ do |resource|
   class ExampleApi < Sinatra::Base
     configure do
@@ -87,5 +93,5 @@ When /^I make a request for the "(.*?)" resource "(.*?)" with "(.*?)"$/ do |reso
 end
 
 Then /^I should see$/ do |string|
-  JSON.parse(page.body).should eql JSON.parse string
+  JSON.parse(page.source).should eql JSON.parse string
 end

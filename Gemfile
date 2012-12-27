@@ -22,6 +22,7 @@ group :development, :test do
 
   gem 'pry'
   gem "rspec", "~> 2.8.0"
+  gem 'json_spec'
   gem "rdoc", "~> 3.12"
   gem "jeweler", "~> 1.8.3"
 end

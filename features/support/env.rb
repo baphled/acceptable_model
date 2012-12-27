@@ -3,6 +3,7 @@ require "mongoid_slug"
 
 require "capybara"
 require 'capybara/cucumber'
+require "json_spec/cucumber"
 
 require "sinatra"
 require "rack/accept"
@@ -18,6 +19,10 @@ ENV['RACK_ENV'] = "test"
 
 mongoid_config_file = File.join File.dirname(__FILE__), '..', '..', 'example', 'orms', 'config', 'mongoid.yml'
 Mongoid.load!(mongoid_config_file)
+
+def last_json
+  page.source
+end
 
 begin
   DatabaseCleaner.strategy = :truncation

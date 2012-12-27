@@ -41,6 +41,9 @@ GEM
       rake
       rdoc
     json (1.7.5)
+    json_spec (1.1.0)
+      multi_json (~> 1.0)
+      rspec (~> 2.0)
     launchy (2.1.2)
       addressable (~> 2.3)
     libwebsocket (0.1.7.1)
@@ -111,6 +114,7 @@ DEPENDENCIES
   database_cleaner
   i18n
   jeweler (~> 1.8.3)
+  json_spec
   launchy
   mongoid (>= 3.x.0)
   mongoid_slug
