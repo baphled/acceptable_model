@@ -32,7 +32,12 @@ module AcceptableModel
     end
 
     def mapper model, mime_type, attributes_block
-      RelationshipsMapper.new :model => model, :response_block => model.response_block, :attributes_block => attributes_block, :associations => eval("AcceptableModel::#{model.class}" ).associations(mime_type)
+      RelationshipsMapper.new(
+        :model => model,
+        :response_block => model.response_block,
+        :attributes_block => attributes_block,
+        :associations => eval("AcceptableModel::#{model.class}" ).associations(mime_type)
+      )
     end
 
     def model_attributes model, attributes
